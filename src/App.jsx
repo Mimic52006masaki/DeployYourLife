@@ -49,6 +49,10 @@ function App() {
     setGameState(prev => {
       let newState = { ...prev, actionsLeft: prev.actionsLeft - 1 };
       if (action === 'learn') {
+        if (newState.money < 20000) {
+          newState.message = 'お金が足りません';
+          return prev;
+        }
         newState.languages = { ...newState.languages };
         newState.languages[lang] += 1;
         newState.money -= 20000;
@@ -161,7 +165,14 @@ function App() {
   }
 
   if (gameState.endGame) {
-    const score = gameState.money * 0.3 + gameState.skill * 10000 + gameState.mental * 1000; // 仮評価
+    const langScore =
+      gameState.languages.javascript * 10000 +
+      gameState.languages.python * 12000 +
+      gameState.languages.design * 8000;
+    const score =
+      gameState.money * 0.3 +
+      langScore +
+      gameState.mental * 1000;
     let ending = '破産寸前';
     if (score > 500000) ending = '安定した社会人';
     else if (score > 300000) ending = '攻める準備が整った個人';
@@ -218,7 +229,7 @@ function App() {
         {gameState.jobs.map((job, index) => (
           <div key={index} style={{ border: '1px solid black', margin: '10px', padding: '10px' }}>
             <p>{job.name}</p>
-            <p>必要スキル: {job.skillReq}</p>
+            <p>必要スキル: {job.levelReq}</p>
             <p>報酬: {job.reward}円</p>
             <p>精神: +{job.mentalGain}</p>
             <button onClick={() => setGameState(prev => ({ ...prev, selectedJob: job }))} disabled={gameState.actionsLeft <= 0}>選択</button>
