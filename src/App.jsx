@@ -16,6 +16,7 @@ function App() {
     gameOver: false,
     endGame: false,
     message: '',
+    monthReport: null, // 月次レポート
   });
 
   const generateJobs = (languages) => {
@@ -85,6 +86,8 @@ function App() {
         if (success) {
           newState.money += reward;
           newState.mental += mentalGain;
+          if (!newState.monthReport) newState.monthReport = { freelanceIncome: 0 };
+          newState.monthReport.freelanceIncome = (newState.monthReport.freelanceIncome || 0) + reward;
           newState.message += `${job.name}完了。報酬+${reward}円, 精神+${mentalGain}`;
         } else {
           newState.message += `${job.name}失敗。報酬なし`;
@@ -131,32 +134,56 @@ function App() {
   const endMonth = () => {
     setGameState(prev => {
       let newState = { ...prev };
+      let report = {
+        month: newState.month + 1,
+        income: 0,
+        expenses: 0,
+        jobIncome: 0,
+        freelanceIncome: 0,
+        corporationIncome: 0,
+        mentalChange: 0,
+        netMoney: 0,
+      };
       // 月収
       if (newState.job === 'バイト') {
-        newState.money += Math.floor(Math.random() * 30000) + 120000;
+        const jobInc = Math.floor(Math.random() * 30000) + 120000;
+        newState.money += jobInc;
+        report.jobIncome = jobInc;
+        report.income += jobInc;
       } else if (newState.job === '会社員') {
         newState.money += 220000;
+        report.jobIncome = 220000;
+        report.income += 220000;
       }
       // 生活費
       if (newState.job === 'バイト') {
         newState.money -= 100000;
+        report.expenses += 100000;
       } else {
         newState.money -= 180000;
+        report.expenses += 180000;
       }
       // AI Pro サブスク
       if (newState.aiPlan === 'pro') {
         newState.money -= 50000;
+        report.expenses += 50000;
       }
       // 法人化収益・固定費
       if (newState.corporation) {
         const corpRevenue = newState.followers * 100; // フォロワー1人あたり100円/月
         newState.money += corpRevenue;
         newState.money -= 100000; // 固定費（オフィス・人件費等）
-        newState.message += ` 法人収益+${corpRevenue}円, 固定費-100,000円`;
+        report.corporationIncome = corpRevenue;
+        report.income += corpRevenue;
+        report.expenses += 100000;
       }
       // 精神変動 (仮)
       // イベント判定
       newState = checkEvents(newState);
+      report.mentalChange = newState.mental - prev.mental;
+      report.netMoney = newState.money - prev.money;
+      // 月次レポート設定
+      newState.monthReport = report;
       // 破産チェック
       if (newState.money <= 0) {
         newState.gameOver = true;
@@ -361,6 +388,53 @@ function App() {
             <button onClick={endMonth} disabled={gameState.actionsLeft > 0} className="mt-6 bg-orange-600 hover:bg-orange-700 text-white py-3 px-6 rounded w-full disabled:bg-gray-600">月末処理</button>
           </div>
         </div>
+        {gameState.monthReport && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full text-white">
+              <h2 className="text-2xl font-bold mb-4 text-center">📊 月次レポート (第{gameState.monthReport.month}ヶ月)</h2>
+              <div className="space-y-2 mb-6">
+                <div className="flex justify-between">
+                  <span>給料収入:</span>
+                  <span className="text-green-400">+{gameState.monthReport.jobIncome.toLocaleString()}円</span>
+                </div>
+                {gameState.monthReport.freelanceIncome > 0 && (
+                  <div className="flex justify-between">
+                    <span>副業収入:</span>
+                    <span className="text-green-400">+{gameState.monthReport.freelanceIncome.toLocaleString()}円</span>
+                  </div>
+                )}
+                {gameState.monthReport.corporationIncome > 0 && (
+                  <div className="flex justify-between">
+                    <span>法人収益:</span>
+                    <span className="text-green-400">+{gameState.monthReport.corporationIncome.toLocaleString()}円</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span>生活費:</span>
+                  <span className="text-red-400">-{gameState.monthReport.expenses.toLocaleString()}円</span>
+                </div>
+                <div className="flex justify-between font-bold border-t border-gray-600 pt-2">
+                  <span>収支合計:</span>
+                  <span className={gameState.monthReport.netMoney >= 0 ? "text-green-400" : "text-red-400"}>
+                    {gameState.monthReport.netMoney >= 0 ? '+' : ''}{gameState.monthReport.netMoney.toLocaleString()}円
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>精神変動:</span>
+                  <span className={gameState.monthReport.mentalChange >= 0 ? "text-blue-400" : "text-red-400"}>
+                    {gameState.monthReport.mentalChange >= 0 ? '+' : ''}{gameState.monthReport.mentalChange}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setGameState(prev => ({ ...prev, monthReport: null }))}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+              >
+                次月へ進む
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
