@@ -8,6 +8,7 @@ function App() {
     mental: 30,
     languages: { javascript: 0, python: 0, design: 0 },
     aiPlan: 'free', // 'free' or 'pro'
+    followers: 0,
     actionsLeft: 2,
     jobs: [],
     selectedJob: null,
@@ -77,6 +78,9 @@ function App() {
           reward = Math.floor(reward * 0.5); // ケアレスミス
           newState.message = 'ケアレスミス発生。';
         }
+        // フォロワーボーナス
+        const followerBonus = 1 + Math.min(newState.followers / 1000, 1);
+        reward = Math.floor(reward * followerBonus);
         if (success) {
           newState.money += reward;
           newState.mental += mentalGain;
@@ -88,6 +92,28 @@ function App() {
       } else if (action === 'rest') {
         newState.mental = Math.max(0, newState.mental - 20);
         newState.message = '休養しました。精神-20';
+      } else if (action === 'post') {
+        let followChange = 0;
+        let mentalChange = 0;
+        const rand = Math.random();
+        let proBonus = newState.aiPlan === 'pro' ? 0.1 : 0;
+        let flameRisk = 0.1 + (newState.mental / 100) * 0.2 - proBonus; // 精神が高いほど炎上率↑, Proで軽減
+        if (rand < flameRisk) {
+          // 炎上
+          followChange = -Math.floor(Math.random() * 70) - 30;
+          mentalChange = 20;
+          newState.message = `SNS投稿炎上。フォロワー${followChange}, 精神+${mentalChange}`;
+        } else if (rand < flameRisk + 0.2 + proBonus) {
+          // バズ
+          followChange = Math.floor(Math.random() * 100) + 50;
+          newState.message = `SNS投稿バズ！フォロワー+${followChange}`;
+        } else {
+          // 通常
+          followChange = Math.floor(Math.random() * 10) + 5;
+          newState.message = `SNS投稿。フォロワー+${followChange}`;
+        }
+        newState.followers = Math.max(0, newState.followers + followChange);
+        newState.mental += mentalChange;
       }
       return newState;
     });
@@ -165,6 +191,7 @@ function App() {
           mental: 30,
           languages: { javascript: 0, python: 0, design: 0 },
           aiPlan: 'free',
+          followers: 0,
           actionsLeft: 2,
           jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
           selectedJob: null,
@@ -204,6 +231,7 @@ function App() {
           mental: 30,
           languages: { javascript: 0, python: 0, design: 0 },
           aiPlan: 'free',
+          followers: 0,
           actionsLeft: 2,
           jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
           selectedJob: null,
@@ -227,6 +255,7 @@ function App() {
         <p>Python: {gameState.languages.python}</p>
         <p>デザイン: {gameState.languages.design}</p>
         <p>AI Plan: {gameState.aiPlan} ({gameState.aiPlan === 'pro' ? '月50,000円' : '無料'})</p>
+        <p>フォロワー: {gameState.followers}</p>
         <p>残行動: {gameState.actionsLeft}</p>
         <p>{gameState.message}</p>
       </div>
@@ -236,6 +265,7 @@ function App() {
         <button onClick={() => doAction('learn', 'python')} disabled={gameState.actionsLeft <= 0}>Python</button>
         <button onClick={() => doAction('learn', 'design')} disabled={gameState.actionsLeft <= 0}>デザイン</button>
         <br />
+        <button onClick={() => doAction('post')} disabled={gameState.actionsLeft <= 0}>SNS投稿</button>
         <button onClick={() => doAction('rest')} disabled={gameState.actionsLeft <= 0}>休養</button>
       </div>
       <div>
