@@ -7,6 +7,7 @@ function App() {
     money: 100000,
     mental: 30,
     languages: { javascript: 0, python: 0, design: 0 },
+    aiPlan: 'free', // 'free' or 'pro'
     actionsLeft: 2,
     jobs: [],
     selectedJob: null,
@@ -66,14 +67,20 @@ function App() {
         if (job.lang && newState.languages[job.lang] < job.levelReq) {
           success = Math.random() > 0.5; // 失敗率
         }
+        // AI Pro 効果
+        let mentalGain = job.mentalGain;
+        if (newState.aiPlan === 'pro') {
+          mentalGain += 10; // 精神消費軽減
+          success = success || Math.random() < 0.1; // 成功率 +10%
+        }
         if (newState.mental >= 80) {
           reward = Math.floor(reward * 0.5); // ケアレスミス
           newState.message = 'ケアレスミス発生。';
         }
         if (success) {
           newState.money += reward;
-          newState.mental += job.mentalGain;
-          newState.message += `${job.name}完了。報酬+${reward}円, 精神+${job.mentalGain}`;
+          newState.mental += mentalGain;
+          newState.message += `${job.name}完了。報酬+${reward}円, 精神+${mentalGain}`;
         } else {
           newState.message += `${job.name}失敗。報酬なし`;
         }
@@ -100,6 +107,10 @@ function App() {
         newState.money -= 100000;
       } else {
         newState.money -= 180000;
+      }
+      // AI Pro サブスク
+      if (newState.aiPlan === 'pro') {
+        newState.money -= 50000;
       }
       // 精神変動 (仮)
       // イベント判定
@@ -153,6 +164,7 @@ function App() {
           money: 100000,
           mental: 30,
           languages: { javascript: 0, python: 0, design: 0 },
+          aiPlan: 'free',
           actionsLeft: 2,
           jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
           selectedJob: null,
@@ -191,6 +203,7 @@ function App() {
           money: 100000,
           mental: 30,
           languages: { javascript: 0, python: 0, design: 0 },
+          aiPlan: 'free',
           actionsLeft: 2,
           jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
           selectedJob: null,
@@ -213,6 +226,7 @@ function App() {
         <p>JavaScript: {gameState.languages.javascript}</p>
         <p>Python: {gameState.languages.python}</p>
         <p>デザイン: {gameState.languages.design}</p>
+        <p>AI Plan: {gameState.aiPlan} ({gameState.aiPlan === 'pro' ? '月50,000円' : '無料'})</p>
         <p>残行動: {gameState.actionsLeft}</p>
         <p>{gameState.message}</p>
       </div>
@@ -237,6 +251,12 @@ function App() {
         ))}
         {gameState.selectedJob && <p>選択中: {gameState.selectedJob.name}</p>}
         <button onClick={() => doAction('job')} disabled={!gameState.selectedJob || gameState.actionsLeft <= 0}>副業実行</button>
+      </div>
+      <div>
+        <h3>AIツール</h3>
+        <button onClick={() => setGameState(prev => ({ ...prev, aiPlan: 'free' }))}>Free</button>
+        <button onClick={() => setGameState(prev => ({ ...prev, aiPlan: 'pro' }))}>Pro</button>
+        <p>Pro: 精神消費-10, 成功率+10%, 月50,000円</p>
       </div>
       <button onClick={endMonth} disabled={gameState.actionsLeft > 0}>月末処理</button>
     </div>
