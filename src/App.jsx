@@ -197,25 +197,27 @@ function App() {
 
   if (gameState.gameOver) {
     return (
-      <div>
-        <h1>ゲームオーバー</h1>
-        <p>{gameState.message}</p>
-        <button onClick={() => setGameState({
-          month: 1,
-          job: 'バイト',
-          money: 100000,
-          mental: 30,
-          languages: { javascript: 0, python: 0, design: 0 },
-          aiPlan: 'free',
-          followers: 0,
-          corporation: false,
-          actionsLeft: 2,
-          jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
-          selectedJob: null,
-          gameOver: false,
-          endGame: false,
-          message: '',
-        })}>リプレイ</button>
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-6">
+        <div className="bg-gray-800 p-8 rounded-lg shadow-lg text-center max-w-md">
+          <h1 className="text-3xl font-bold mb-4 text-red-400">ゲームオーバー</h1>
+          <p className="mb-6">{gameState.message}</p>
+          <button onClick={() => setGameState({
+            month: 1,
+            job: 'バイト',
+            money: 100000,
+            mental: 30,
+            languages: { javascript: 0, python: 0, design: 0 },
+            aiPlan: 'free',
+            followers: 0,
+            corporation: false,
+            actionsLeft: 2,
+            jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
+            selectedJob: null,
+            gameOver: false,
+            endGame: false,
+            message: '',
+          })} className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded">リプレイ</button>
+        </div>
       </div>
     );
   }
@@ -233,88 +235,133 @@ function App() {
     if (score > 500000) ending = '安定した社会人';
     else if (score > 300000) ending = '攻める準備が整った個人';
     return (
-      <div>
-        <h1>エンディング</h1>
-        <p>所持金: {gameState.money}</p>
-        <p>JavaScript: {gameState.languages.javascript}</p>
-        <p>Python: {gameState.languages.python}</p>
-        <p>デザイン: {gameState.languages.design}</p>
-        <p>精神: {gameState.mental}</p>
-        <p>エンディング: {ending}</p>
-        <button onClick={() => setGameState({
-          month: 1,
-          job: 'バイト',
-          money: 100000,
-          mental: 30,
-          languages: { javascript: 0, python: 0, design: 0 },
-          aiPlan: 'free',
-          followers: 0,
-          corporation: false,
-          actionsLeft: 2,
-          jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
-          selectedJob: null,
-          gameOver: false,
-          endGame: false,
-          message: '',
-        })}>リプレイ</button>
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-6">
+        <div className="bg-gray-800 p-8 rounded-lg shadow-lg text-center max-w-lg">
+          <h1 className="text-3xl font-bold mb-6 text-green-400">エンディング</h1>
+          <div className="text-left mb-6 space-y-2">
+            <p>所持金: {gameState.money}円</p>
+            <p>JavaScript Lv: {gameState.languages.javascript}</p>
+            <p>Python Lv: {gameState.languages.python}</p>
+            <p>デザイン Lv: {gameState.languages.design}</p>
+            <p>フォロワー: {gameState.followers}</p>
+            <p>精神: {gameState.mental}</p>
+            <p className="text-xl font-bold text-yellow-400">エンディング: {ending}</p>
+          </div>
+          <button onClick={() => setGameState({
+            month: 1,
+            job: 'バイト',
+            money: 100000,
+            mental: 30,
+            languages: { javascript: 0, python: 0, design: 0 },
+            aiPlan: 'free',
+            followers: 0,
+            corporation: false,
+            actionsLeft: 2,
+            jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
+            selectedJob: null,
+            gameOver: false,
+            endGame: false,
+            message: '',
+          })} className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded">リプレイ</button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <h1>Deploy Your Life</h1>
-      <div>
-        <p>月: {gameState.month}</p>
-        <p>職業: {gameState.job}</p>
-        <p>所持金: {gameState.money}円</p>
-        <p>精神: {gameState.mental} {gameState.mental >= 60 ? (gameState.mental >= 80 ? '危険' : '注意') : '安定'}</p>
-        <p>JavaScript: {gameState.languages.javascript}</p>
-        <p>Python: {gameState.languages.python}</p>
-        <p>デザイン: {gameState.languages.design}</p>
-        <p>AI Plan: {gameState.aiPlan} ({gameState.aiPlan === 'pro' ? '月50,000円' : '無料'})</p>
-        <p>フォロワー: {gameState.followers}</p>
-        <p>法人化: {gameState.corporation ? '済' : '未'}</p>
-        <p>残行動: {gameState.actionsLeft}</p>
-        <p>{gameState.message}</p>
-      </div>
-      <div>
-        <h3>言語学習</h3>
-        <button onClick={() => doAction('learn', 'javascript')} disabled={gameState.actionsLeft <= 0}>JavaScript</button>
-        <button onClick={() => doAction('learn', 'python')} disabled={gameState.actionsLeft <= 0}>Python</button>
-        <button onClick={() => doAction('learn', 'design')} disabled={gameState.actionsLeft <= 0}>デザイン</button>
-        <br />
-        <button onClick={() => doAction('post')} disabled={gameState.actionsLeft <= 0}>SNS投稿</button>
-        <button onClick={() => doAction('rest')} disabled={gameState.actionsLeft <= 0}>休養</button>
-      </div>
-      <div>
-        <h2>副業案件</h2>
-        {gameState.jobs.map((job, index) => (
-          <div key={index} style={{ border: '1px solid black', margin: '10px', padding: '10px' }}>
-            <p>{job.name}</p>
-            <p>必要スキル: {job.levelReq}</p>
-            <p>報酬: {job.reward}円</p>
-            <p>精神: +{job.mentalGain}</p>
-            <button onClick={() => setGameState(prev => ({ ...prev, selectedJob: job }))} disabled={gameState.actionsLeft <= 0}>選択</button>
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-4xl font-bold mb-8 text-center">Deploy Your Life</h1>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-semibold mb-4">ステータス</h2>
+            <p className="mb-2">月: {gameState.month}</p>
+            <p className="mb-2">職業: {gameState.job}</p>
+            <div className="mb-4">
+              <div className="flex justify-between mb-1">
+                <span>所持金</span>
+                <span>{gameState.money}円</span>
+              </div>
+              <div className="w-full bg-gray-700 rounded">
+                <div className="h-4 bg-green-500 rounded" style={{ width: `${Math.min(gameState.money / 500000 * 100, 100)}%` }} />
+              </div>
+            </div>
+            <div className="mb-4">
+              <div className="flex justify-between mb-1">
+                <span className={`font-bold ${gameState.mental >= 80 ? 'text-red-400' : gameState.mental >= 60 ? 'text-yellow-400' : 'text-green-400'}`}>
+                  精神: {gameState.mental} ({gameState.mental >= 60 ? (gameState.mental >= 80 ? '危険' : '注意') : '安定'})
+                </span>
+              </div>
+              <div className="w-full bg-gray-700 rounded">
+                <div className={`h-4 rounded ${gameState.mental >= 80 ? 'bg-red-500' : gameState.mental >= 60 ? 'bg-yellow-400' : 'bg-green-500'}`} style={{ width: `${gameState.mental}%` }} />
+              </div>
+            </div>
+            <p className="mb-2">JavaScript: {gameState.languages.javascript}</p>
+            <p className="mb-2">Python: {gameState.languages.python}</p>
+            <p className="mb-2">デザイン: {gameState.languages.design}</p>
+            <p className="mb-2">AI Plan: {gameState.aiPlan} ({gameState.aiPlan === 'pro' ? '月50,000円' : '無料'})</p>
+            <div className="mb-4">
+              <div className="flex justify-between mb-1">
+                <span>フォロワー</span>
+                <span>{gameState.followers}</span>
+              </div>
+              <div className="w-full bg-gray-700 rounded">
+                <div className="h-4 bg-blue-500 rounded" style={{ width: `${Math.min(gameState.followers / 1000 * 100, 100)}%` }} />
+              </div>
+            </div>
+            <p className="mb-2">法人化: <span className={`px-3 py-1 rounded-full text-sm ${gameState.corporation ? 'bg-green-600' : 'bg-gray-600'}`}>{gameState.corporation ? '済' : '未'}</span></p>
+            <p className="mb-2">残行動: {gameState.actionsLeft}</p>
+            <p className="text-yellow-300 bg-gray-700 p-2 rounded">{gameState.message}</p>
+            </div>
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-semibold mb-4">行動</h2>
+            <div className="mb-4">
+              <h3 className="text-lg font-medium mb-2">言語学習</h3>
+              <div className="grid grid-cols-1 gap-2">
+                <button onClick={() => doAction('learn', 'javascript')} disabled={gameState.actionsLeft <= 0} className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded disabled:bg-gray-600">JavaScript</button>
+                <button onClick={() => doAction('learn', 'python')} disabled={gameState.actionsLeft <= 0} className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded disabled:bg-gray-600">Python</button>
+                <button onClick={() => doAction('learn', 'design')} disabled={gameState.actionsLeft <= 0} className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded disabled:bg-gray-600">デザイン</button>
+              </div>
+            </div>
+            <div className="mb-4">
+              <button onClick={() => doAction('post')} disabled={gameState.actionsLeft <= 0} className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded w-full disabled:bg-gray-600">SNS投稿</button>
+              <button onClick={() => doAction('rest')} disabled={gameState.actionsLeft <= 0} className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded w-full mt-2 disabled:bg-gray-600">休養</button>
+            </div>
           </div>
-        ))}
-        {gameState.selectedJob && <p>選択中: {gameState.selectedJob.name}</p>}
-        <button onClick={() => doAction('job')} disabled={!gameState.selectedJob || gameState.actionsLeft <= 0}>副業実行</button>
-      </div>
-      <div>
-        <h3>AIツール</h3>
-        <button onClick={() => setGameState(prev => ({ ...prev, aiPlan: 'free' }))}>Free</button>
-        <button onClick={() => setGameState(prev => ({ ...prev, aiPlan: 'pro' }))}>Pro</button>
-        <p>Pro: 精神消費-10, 成功率+10%, 月50,000円</p>
-      </div>
-      {!gameState.corporation && gameState.money >= 200000 && gameState.languages.javascript >= 1 && gameState.languages.python >= 1 && gameState.languages.design >= 1 && gameState.followers >= 500 && (
-        <div>
-          <h3>法人化</h3>
-          <button onClick={() => doAction('incorporate')}>法人化する (200,000円)</button>
-          <p>条件: 所持金20万以上、各言語Lv1以上、フォロワー500以上</p>
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-semibold mb-4">副業案件</h2>
+            <div className="space-y-4 mb-4">
+              {gameState.jobs.map((job, index) => (
+                <div key={index} className="bg-gray-700 p-4 rounded border border-gray-600">
+                  <p className="font-medium">{job.name}</p>
+                  <p className="text-sm text-gray-300">必要スキル: {job.levelReq}</p>
+                  <p className="text-sm text-green-400">報酬: {job.reward}円</p>
+                  <p className="text-sm text-blue-400">精神: +{job.mentalGain}</p>
+                  <button onClick={() => setGameState(prev => ({ ...prev, selectedJob: job }))} disabled={gameState.actionsLeft <= 0} className="mt-2 bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded disabled:bg-gray-600">選択</button>
+                </div>
+              ))}
+            </div>
+            {gameState.selectedJob && <p className="text-yellow-300 mb-2">選択中: {gameState.selectedJob.name}</p>}
+            <button onClick={() => doAction('job')} disabled={!gameState.selectedJob || gameState.actionsLeft <= 0} className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded w-full disabled:bg-gray-600">副業実行</button>
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-2">AIツール</h3>
+              <div className="flex gap-2 mb-2">
+                <button onClick={() => setGameState(prev => ({ ...prev, aiPlan: 'free' }))} className={`py-2 px-4 rounded ${gameState.aiPlan === 'free' ? 'bg-blue-600' : 'bg-gray-600'} text-white`}>Free</button>
+                <button onClick={() => setGameState(prev => ({ ...prev, aiPlan: 'pro' }))} className={`py-2 px-4 rounded ${gameState.aiPlan === 'pro' ? 'bg-blue-600' : 'bg-gray-600'} text-white`}>Pro</button>
+              </div>
+              <p className="text-sm text-gray-300">Pro: 精神消費-10, 成功率+10%, 月50,000円</p>
+            </div>
+            {!gameState.corporation && gameState.money >= 200000 && gameState.languages.javascript >= 1 && gameState.languages.python >= 1 && gameState.languages.design >= 1 && gameState.followers >= 500 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-medium mb-2">法人化</h3>
+                <button onClick={() => doAction('incorporate')} className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded w-full">法人化する (200,000円)</button>
+                <p className="text-sm text-gray-300 mt-1">条件: 所持金20万以上、各言語Lv1以上、フォロワー500以上</p>
+              </div>
+            )}
+            <button onClick={endMonth} disabled={gameState.actionsLeft > 0} className="mt-6 bg-orange-600 hover:bg-orange-700 text-white py-3 px-6 rounded w-full disabled:bg-gray-600">月末処理</button>
+          </div>
         </div>
-      )}
-      <button onClick={endMonth} disabled={gameState.actionsLeft > 0}>月末処理</button>
+      </div>
     </div>
   );
 }
