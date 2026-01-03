@@ -19,6 +19,7 @@ import {
   Rocket,
   Sun
 } from 'lucide-react';
+import { QuestPanel } from './components/QuestPanel';
 
 function App() {
   const [gameState, setGameState] = useState({
@@ -273,6 +274,15 @@ function App() {
     if (gameState.mental >= 70) return "😨";
     if (gameState.mental >= 50) return "😐";
     return "😎";
+  };
+
+  const getMentalColor = () => {
+    if (gameState.mental >= 90) return 'bg-red-600';
+    if (gameState.mental >= 80) return 'bg-red-500';
+    if (gameState.mental >= 70) return 'bg-orange-500';
+    if (gameState.mental >= 60) return 'bg-yellow-500';
+    if (gameState.mental >= 50) return 'bg-lime-500';
+    return 'bg-green-500';
   };
 
   if (gameState.gameOver) {
