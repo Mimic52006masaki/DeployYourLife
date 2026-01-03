@@ -336,11 +336,11 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f4f5] text-zinc-800 font-mono p-2 md:p-6 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
-      <div className="max-w-7xl mx-auto space-y-4">
+    <div className="min-h-screen bg-[#f4f4f5] text-zinc-800 font-mono overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
+      <div className="max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
 
         {/* Top HUD */}
-        <header className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white border-2 border-zinc-900 p-4 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <header className="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-4 bg-white border-2 border-zinc-900 p-4 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500"></div>
           <div className="flex flex-col items-center md:items-start justify-center">
             <h1 className="text-xl font-black tracking-widest flex items-center gap-2 text-zinc-900">
@@ -374,7 +374,7 @@ function App() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
           {/* Status Column */}
-          <div className="lg:col-span-3 space-y-4">
+          <div className="lg:col-span-3 space-y-4 order-2 lg:order-1">
             <section className="bg-white border-2 border-zinc-900 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <h2 className="text-xs font-black bg-zinc-900 text-white px-2 py-1 inline-block mb-4">STATUS</h2>
 
@@ -433,7 +433,7 @@ function App() {
           </div>
 
           {/* Action Area */}
-          <div className="lg:col-span-6 space-y-4">
+          <div className="lg:col-span-5 space-y-4 order-1 lg:order-2">
             <section className="bg-white border-2 border-zinc-900 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <h2 className="text-xs font-black bg-zinc-900 text-white px-2 py-1 inline-block mb-4">COMMAND_MENU</h2>
 
