@@ -1,22 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Trophy, 
-  Brain, 
-  Coins, 
-  Users, 
-  Code, 
-  Terminal, 
-  Palette, 
-  Zap, 
-  Moon, 
-  MessageSquare, 
-  ChevronRight, 
+import {
+  Trophy,
+  Brain,
+  Coins,
+  Users,
+  Code,
+  Terminal,
+  Palette,
+  Zap,
+  Moon,
+  MessageSquare,
+  ChevronRight,
   Building2,
   TrendingUp,
   AlertCircle,
   Skull,
   Gamepad2,
-  Rocket
+  Rocket,
+  Sun
 } from 'lucide-react';
 
 function App() {
@@ -75,10 +76,10 @@ function App() {
 
   const doAction = (action, lang) => {
     if (gameState.actionsLeft <= 0) return;
-    
+
     setGameState(prev => {
       let newState = { ...prev, actionsLeft: prev.actionsLeft - 1 };
-      
+
       if (action === 'learn') {
         if (newState.money < 20000) {
           addLog("💰 お金が足りない！", "error");
@@ -97,18 +98,18 @@ function App() {
         if (job.lang && newState.languages[job.lang] < job.levelReq) {
           success = Math.random() > 0.5;
         }
-        
+
         let mentalGain = job.mentalGain;
         if (newState.aiPlan === 'pro') {
           mentalGain += 10;
           success = success || Math.random() < 0.1;
         }
-        
+
         if (newState.mental >= 80) {
           reward = Math.floor(reward * 0.5);
           addLog("😵 過労でミス連発...報酬激減！", "warning");
         }
-        
+
         const followerBonus = 1 + Math.min(newState.followers / 1000, 1);
         reward = Math.floor(reward * followerBonus);
 
@@ -276,11 +277,11 @@ function App() {
 
   if (gameState.gameOver) {
     return (
-      <div className="min-h-screen bg-red-950 text-white flex items-center justify-center p-6 font-mono">
-        <div className="bg-black border-4 border-red-600 p-8 rounded-none shadow-[10px_10px_0px_0px_rgba(220,38,38,1)] text-center max-w-md w-full">
+      <div className="min-h-screen bg-red-100 text-red-900 flex items-center justify-center p-6 font-mono">
+        <div className="bg-white border-4 border-red-600 p-8 rounded-none shadow-[10px_10px_0px_0px_rgba(220,38,38,1)] text-center max-w-md w-full">
           <Skull className="text-red-600 w-20 h-20 mx-auto mb-4 animate-bounce" />
-          <h1 className="text-5xl font-black mb-4 text-red-600">GAME OVER</h1>
-          <p className="text-zinc-400 mb-8">資金ショート。世知辛い世の中に敗北しました。</p>
+          <h1 className="text-5xl font-black mb-4 text-red-600 uppercase">Game Over</h1>
+          <p className="text-zinc-600 mb-8 font-bold">資金ショート。世知辛い世の中に敗北しました。</p>
           <button onClick={resetGame} className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 px-6 border-b-4 border-red-800 active:translate-y-1 active:border-b-0 transition-all">RETRY?</button>
         </div>
       </div>
@@ -293,21 +294,21 @@ function App() {
     if (score > 1500000) rank = 'S';
     else if (score > 1000000) rank = 'A';
     else if (score > 500000) rank = 'B';
-    
+
     return (
-      <div className="min-h-screen bg-indigo-950 text-white flex items-center justify-center p-6 font-mono">
-        <div className="bg-black border-4 border-indigo-500 p-10 rounded-none shadow-[12px_12px_0px_0px_rgba(99,102,241,1)] max-w-xl w-full">
-          <h1 className="text-4xl font-black mb-8 text-center text-indigo-400 italic">MISSION COMPLETE</h1>
+      <div className="min-h-screen bg-indigo-50 text-indigo-900 flex items-center justify-center p-6 font-mono">
+        <div className="bg-white border-4 border-indigo-500 p-10 rounded-none shadow-[12px_12px_0px_0px_rgba(99,102,241,1)] max-w-xl w-full">
+          <h1 className="text-4xl font-black mb-8 text-center text-indigo-600 italic">MISSION COMPLETE</h1>
           <div className="flex justify-center mb-8">
             <div className="text-8xl font-black text-yellow-400 border-8 border-yellow-400 p-4 rotate-12">{rank}</div>
           </div>
           <div className="grid grid-cols-2 gap-4 mb-8 text-sm">
-            <div className="bg-zinc-900 p-4 border-2 border-zinc-700">
-              <p className="text-zinc-500">FINAL CASH</p>
+            <div className="bg-indigo-50 p-4 border-2 border-indigo-200">
+              <p className="text-indigo-400 font-bold uppercase">Final Cash</p>
               <p className="text-xl font-bold">¥{gameState.money.toLocaleString()}</p>
             </div>
-            <div className="bg-zinc-900 p-4 border-2 border-zinc-700">
-              <p className="text-zinc-500">INFLUENCE</p>
+            <div className="bg-indigo-50 p-4 border-2 border-indigo-200">
+              <p className="text-indigo-400 font-bold uppercase">Influence</p>
               <p className="text-xl font-bold">{gameState.followers.toLocaleString()}</p>
             </div>
           </div>
@@ -318,58 +319,58 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] text-emerald-400 font-mono p-2 md:p-6 overflow-x-hidden selection:bg-emerald-900 selection:text-white">
+    <div className="min-h-screen bg-[#f4f4f5] text-zinc-800 font-mono p-2 md:p-6 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
       <div className="max-w-7xl mx-auto space-y-4">
-        
+
         {/* Top HUD */}
-        <header className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-900 border-2 border-emerald-500 p-4 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 animate-pulse"></div>
+        <header className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white border-2 border-zinc-900 p-4 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500"></div>
           <div className="flex flex-col items-center md:items-start justify-center">
-            <h1 className="text-xl font-black tracking-widest flex items-center gap-2">
-              <Gamepad2 size={24} className="animate-spin-slow" />
+            <h1 className="text-xl font-black tracking-widest flex items-center gap-2 text-zinc-900">
+              <Sun size={24} className="text-yellow-500" />
               DEPLOY_YOUR_LIFE.EXE
             </h1>
           </div>
-          <div className="flex justify-center items-center gap-4 bg-black p-2 border border-zinc-800">
+          <div className="flex justify-center items-center gap-4 bg-zinc-50 p-2 border border-zinc-200">
             <div className="text-center">
-              <p className="text-[10px] text-zinc-500">MONTH</p>
-              <p className="text-2xl font-black text-white">{gameState.month.toString().padStart(2, '0')}<span className="text-xs text-zinc-500">/12</span></p>
+              <p className="text-[10px] text-zinc-400 font-bold uppercase">Month</p>
+              <p className="text-2xl font-black text-zinc-900">{gameState.month.toString().padStart(2, '0')}<span className="text-xs text-zinc-400">/12</span></p>
             </div>
-            <div className="h-8 w-px bg-zinc-700"></div>
+            <div className="h-8 w-px bg-zinc-200"></div>
             <div className="text-center">
-              <p className="text-[10px] text-zinc-500">ACTIONS</p>
+              <p className="text-[10px] text-zinc-400 font-bold uppercase">Actions</p>
               <div className="flex gap-1 justify-center mt-1">
                 {[...Array(2)].map((_, i) => (
-                  <div key={i} className={`w-4 h-4 rounded-sm border ${i < gameState.actionsLeft ? 'bg-yellow-400 border-yellow-200' : 'bg-zinc-800 border-zinc-700'}`}></div>
+                  <div key={i} className={`w-4 h-4 rounded-sm border ${i < gameState.actionsLeft ? 'bg-indigo-500 border-indigo-600' : 'bg-zinc-200 border-zinc-300'}`}></div>
                 ))}
               </div>
             </div>
           </div>
           <div className="flex justify-center md:justify-end items-center gap-4">
-             <div className="bg-emerald-900/20 px-4 py-2 border-2 border-emerald-500 flex items-center gap-3">
-               <Coins size={20} className="text-yellow-400" />
-               <span className="text-2xl font-black text-white">¥{gameState.money.toLocaleString()}</span>
+             <div className="bg-yellow-50 px-4 py-2 border-2 border-yellow-500 flex items-center gap-3">
+               <Coins size={20} className="text-yellow-600" />
+               <span className="text-2xl font-black text-zinc-900">¥{gameState.money.toLocaleString()}</span>
              </div>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
           {/* Status Column */}
           <div className="lg:col-span-3 space-y-4">
-            <section className="bg-zinc-900 border-2 border-zinc-700 p-4">
-              <h2 className="text-xs font-black bg-zinc-700 text-white px-2 py-1 inline-block mb-4">STATUS</h2>
-              
+            <section className="bg-white border-2 border-zinc-900 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <h2 className="text-xs font-black bg-zinc-900 text-white px-2 py-1 inline-block mb-4">STATUS</h2>
+
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <div className="text-4xl bg-black border-2 border-zinc-700 w-16 h-16 flex items-center justify-center rounded-none">
+                  <div className="text-4xl bg-zinc-50 border-2 border-zinc-900 w-16 h-16 flex items-center justify-center rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                     {getMentalEmoji()}
                   </div>
                   <div className="flex-1">
-                    <p className="text-[10px] text-zinc-500 font-bold uppercase">HP / MENTAL STRESS</p>
-                    <div className="h-4 w-full bg-zinc-800 border border-zinc-600 mt-1 relative">
-                      <div 
-                        className={`h-full transition-all duration-700 ${gameState.mental >= 80 ? 'bg-red-600' : 'bg-emerald-500'}`}
+                    <p className="text-[10px] text-zinc-400 font-bold uppercase">HP / Mental Stress</p>
+                    <div className="h-4 w-full bg-zinc-100 border border-zinc-300 mt-1 relative">
+                      <div
+                        className={`h-full transition-all duration-700 ${gameState.mental >= 80 ? 'bg-red-500' : 'bg-emerald-500'}`}
                         style={{ width: `${100 - gameState.mental}%` }}
                       />
                     </div>
@@ -377,30 +378,30 @@ function App() {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[10px] text-zinc-500 font-bold uppercase">SKILLS_TREE</p>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Skills_Tree</p>
                   {Object.entries(gameState.languages).map(([name, lv]) => (
-                    <div key={name} className="flex justify-between items-center p-2 bg-black border border-zinc-800 group hover:border-emerald-500 transition-colors">
-                      <span className="text-xs font-bold uppercase">{name}</span>
+                    <div key={name} className="flex justify-between items-center p-2 bg-zinc-50 border border-zinc-200 group hover:border-indigo-500 transition-colors">
+                      <span className="text-xs font-bold uppercase text-zinc-600">{name}</span>
                       <div className="flex items-center gap-2">
                         <div className="flex gap-0.5">
                           {[...Array(5)].map((_, i) => (
-                            <div key={i} className={`w-1.5 h-3 ${i < lv ? 'bg-emerald-500' : 'bg-zinc-800'}`}></div>
+                            <div key={i} className={`w-1.5 h-3 ${i < lv ? 'bg-indigo-500' : 'bg-zinc-200'}`}></div>
                           ))}
                         </div>
-                        <span className="text-xs font-mono">LV.{lv}</span>
+                        <span className="text-xs font-mono font-bold">LV.{lv}</span>
                       </div>
                     </div>
                   ))}
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-[10px]">
-                  <div className="bg-black border border-zinc-800 p-2">
-                    <p className="text-zinc-600">INFLUENCE</p>
-                    <p className="text-sm font-bold text-white">{gameState.followers.toLocaleString()}</p>
+                  <div className="bg-zinc-50 border border-zinc-200 p-2">
+                    <p className="text-zinc-400 font-bold">INFLUENCE</p>
+                    <p className="text-sm font-bold text-zinc-900">{gameState.followers.toLocaleString()}</p>
                   </div>
-                  <div className="bg-black border border-zinc-800 p-2">
-                    <p className="text-zinc-600">CORP</p>
-                    <p className={`text-sm font-bold ${gameState.corporation ? 'text-indigo-400' : 'text-zinc-600'}`}>
+                  <div className="bg-zinc-50 border border-zinc-200 p-2">
+                    <p className="text-zinc-400 font-bold">CORP</p>
+                    <p className={`text-sm font-bold ${gameState.corporation ? 'text-indigo-600' : 'text-zinc-600'}`}>
                       {gameState.corporation ? 'ACTIVE' : 'NONE'}
                     </p>
                   </div>
@@ -408,75 +409,75 @@ function App() {
               </div>
             </section>
 
-            <div className="bg-emerald-600 text-black p-4 border-b-4 border-emerald-800 font-black flex flex-col items-center">
-              <p className="text-xs opacity-70">CURRENT JOB</p>
+            <div className="bg-zinc-900 text-white p-4 border-b-4 border-zinc-700 font-black flex flex-col items-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]">
+              <p className="text-[10px] opacity-70 uppercase">Current Job</p>
               <p className="text-xl uppercase tracking-tighter">{gameState.job}</p>
             </div>
           </div>
 
           {/* Action Area */}
           <div className="lg:col-span-6 space-y-4">
-            <section className="bg-zinc-900 border-2 border-zinc-700 p-4">
-              <h2 className="text-xs font-black bg-zinc-700 text-white px-2 py-1 inline-block mb-4">COMMAND_MENU</h2>
-              
+            <section className="bg-white border-2 border-zinc-900 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <h2 className="text-xs font-black bg-zinc-900 text-white px-2 py-1 inline-block mb-4">COMMAND_MENU</h2>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <p className="text-[10px] text-zinc-500 mb-1">DEVELOPMENT / -¥20,000</p>
+                  <p className="text-[10px] text-zinc-400 font-bold mb-1">DEVELOPMENT / -¥20,000</p>
                   <div className="grid grid-cols-1 gap-2">
                     {['javascript', 'python', 'design'].map(lang => (
-                      <button 
+                      <button
                         key={lang}
-                        onClick={() => doAction('learn', lang)} 
+                        onClick={() => doAction('learn', lang)}
                         disabled={gameState.actionsLeft <= 0}
-                        className="bg-zinc-800 hover:bg-emerald-900 border-2 border-zinc-700 hover:border-emerald-500 p-3 flex justify-between items-center group disabled:opacity-30 disabled:hover:bg-zinc-800 disabled:hover:border-zinc-700 transition-all active:translate-y-0.5"
+                        className="bg-zinc-50 hover:bg-indigo-50 border-2 border-zinc-200 hover:border-indigo-500 p-3 flex justify-between items-center group disabled:opacity-30 disabled:hover:bg-zinc-50 disabled:hover:border-zinc-200 transition-all active:translate-y-0.5"
                       >
-                        <span className="text-xs font-bold uppercase">{lang}</span>
-                        <Code size={16} className="group-hover:animate-bounce" />
+                        <span className="text-xs font-black uppercase text-zinc-700">{lang}</span>
+                        <Code size={16} className="text-zinc-400 group-hover:text-indigo-500" />
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[10px] text-zinc-500 mb-1">OTHERS / -1 ACTION</p>
-                  <button onClick={() => doAction('post')} disabled={gameState.actionsLeft <= 0} className="w-full bg-zinc-800 hover:bg-indigo-900 border-2 border-zinc-700 hover:border-indigo-500 p-4 flex flex-col items-center gap-1 disabled:opacity-30 active:translate-y-0.5 transition-all">
+                  <p className="text-[10px] text-zinc-400 font-bold mb-1">OTHERS / -1 ACTION</p>
+                  <button onClick={() => doAction('post')} disabled={gameState.actionsLeft <= 0} className="w-full bg-zinc-50 hover:bg-indigo-50 border-2 border-zinc-200 hover:border-indigo-500 p-4 flex flex-col items-center gap-1 disabled:opacity-30 active:translate-y-0.5 transition-all group">
                     <TrendingUp size={20} className="text-indigo-400" />
-                    <span className="text-[10px] font-black uppercase">SNS POST</span>
+                    <span className="text-[10px] font-black uppercase text-zinc-700">SNS POST</span>
                   </button>
-                  <button onClick={() => doAction('rest')} disabled={gameState.actionsLeft <= 0} className="w-full bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-700 hover:border-white p-4 flex flex-col items-center gap-1 disabled:opacity-30 active:translate-y-0.5 transition-all">
-                    <Moon size={20} className="text-zinc-400" />
-                    <span className="text-[10px] font-black uppercase">REST</span>
+                  <button onClick={() => doAction('rest')} disabled={gameState.actionsLeft <= 0} className="w-full bg-zinc-50 hover:bg-amber-50 border-2 border-zinc-200 hover:border-amber-500 p-4 flex flex-col items-center gap-1 disabled:opacity-30 active:translate-y-0.5 transition-all group">
+                    <Moon size={20} className="text-amber-500" />
+                    <span className="text-[10px] font-black uppercase text-zinc-700">REST</span>
                   </button>
                 </div>
               </div>
 
               {gameState.actionsLeft === 0 && (
-                <div className="mt-6 pt-6 border-t border-zinc-800 text-center animate-pulse">
-                  <button 
-                    onClick={endMonth} 
-                    className="bg-yellow-400 hover:bg-yellow-300 text-black font-black py-4 px-12 border-b-4 border-yellow-700 active:border-b-0 active:translate-y-1 transition-all"
+                <div className="mt-6 pt-6 border-t border-zinc-100 text-center">
+                  <button
+                    onClick={endMonth}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 border-b-4 border-indigo-800 active:border-b-0 active:translate-y-1 transition-all shadow-lg"
                   >
-                    END TURN
+                    NEXT TURN
                   </button>
                 </div>
               )}
             </section>
 
             {/* Terminal Logs */}
-            <section className="bg-black border-2 border-zinc-800 p-4 h-56 flex flex-col">
+            <section className="bg-zinc-900 border-2 border-zinc-900 p-4 h-56 flex flex-col shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                 <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                 <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                <span className="text-[10px] font-mono ml-2 text-zinc-500 uppercase tracking-widest">System Output</span>
+                <span className="text-[10px] font-mono ml-2 text-zinc-500 uppercase tracking-widest">Live Output</span>
               </div>
               <div className="flex-1 overflow-y-auto space-y-1 pr-2 text-xs font-mono scrollbar-none">
                 {gameState.logs.map((log, i) => (
                   <div key={i} className={`flex items-start gap-2 ${
                     log.type === 'success' ? 'text-emerald-400' :
-                    log.type === 'error' ? 'text-red-500 font-bold' :
+                    log.type === 'error' ? 'text-red-400 font-bold' :
                     log.type === 'warning' ? 'text-yellow-400' :
-                    'text-zinc-500'
+                    'text-zinc-400'
                   }`}>
                     <span>&gt;</span>
                     <span>{log.text}</span>
@@ -488,50 +489,50 @@ function App() {
 
           {/* Right Side Panel */}
           <div className="lg:col-span-3 space-y-4">
-            
-            <section className="bg-zinc-900 border-2 border-zinc-700 p-4 relative overflow-hidden">
-              <h2 className="text-xs font-black bg-zinc-700 text-white px-2 py-1 inline-block mb-4">AVAILABLE_QUESTS</h2>
+
+            <section className="bg-white border-2 border-zinc-900 p-4 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <h2 className="text-xs font-black bg-zinc-900 text-white px-2 py-1 inline-block mb-4">AVAILABLE_QUESTS</h2>
               <div className="space-y-2">
                 {gameState.jobs.map((job, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className={`p-3 border-2 transition-all cursor-pointer ${
-                      gameState.selectedJob?.name === job.name 
-                      ? 'bg-emerald-950 border-emerald-500' 
-                      : 'bg-black border-zinc-800 hover:border-zinc-500'
+                      gameState.selectedJob?.name === job.name
+                      ? 'bg-indigo-50 border-indigo-500'
+                      : 'bg-zinc-50 border-zinc-100 hover:border-zinc-300'
                     }`}
                     onClick={() => setGameState(prev => ({ ...prev, selectedJob: job }))}
                   >
                     <div className="flex justify-between items-start mb-1">
-                      <p className="text-[10px] font-bold truncate leading-tight uppercase">{job.name}</p>
-                      {job.lang && <span className="text-[8px] bg-emerald-900 text-emerald-400 px-1 border border-emerald-700">{job.lang}</span>}
+                      <p className="text-[10px] font-bold truncate leading-tight uppercase text-zinc-900">{job.name}</p>
+                      {job.lang && <span className="text-[8px] bg-zinc-900 text-white px-1">{job.lang}</span>}
                     </div>
-                    <p className="text-sm font-black text-white">¥{job.reward.toLocaleString()}</p>
+                    <p className="text-sm font-black text-indigo-600">¥{job.reward.toLocaleString()}</p>
                   </div>
                 ))}
               </div>
-              <button 
-                onClick={() => doAction('job')} 
-                disabled={!gameState.selectedJob || gameState.actionsLeft <= 0} 
-                className="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-black font-black py-3 border-b-4 border-emerald-800 active:border-b-0 active:translate-y-1 transition-all text-xs"
+              <button
+                onClick={() => doAction('job')}
+                disabled={!gameState.selectedJob || gameState.actionsLeft <= 0}
+                className="w-full mt-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-100 disabled:text-zinc-400 text-white font-black py-3 border-b-4 border-emerald-700 active:border-b-0 active:translate-y-1 transition-all text-xs"
               >
                 START QUEST
               </button>
             </section>
 
             {/* AI Enhancement */}
-            <section className="bg-zinc-900 border-2 border-zinc-700 p-4">
-              <h2 className="text-xs font-black text-zinc-500 mb-3 uppercase flex items-center gap-2"><Rocket size={12}/> AI_BOOSTER</h2>
-              <div className="flex border-2 border-zinc-800 bg-black p-1">
-                <button 
+            <section className="bg-white border-2 border-zinc-900 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <h2 className="text-xs font-black text-zinc-400 mb-3 uppercase flex items-center gap-2"><Rocket size={12}/> AI_BOOSTER</h2>
+              <div className="flex border-2 border-zinc-100 bg-zinc-50 p-1">
+                <button
                   onClick={() => setGameState(prev => ({ ...prev, aiPlan: 'free' }))}
-                  className={`flex-1 py-1 text-[10px] font-black ${gameState.aiPlan === 'free' ? 'bg-zinc-700 text-white' : 'text-zinc-700'}`}
+                  className={`flex-1 py-1 text-[10px] font-black transition-all ${gameState.aiPlan === 'free' ? 'bg-zinc-900 text-white shadow-inner' : 'text-zinc-400 hover:text-zinc-600'}`}
                 >
                   FREE
                 </button>
-                <button 
+                <button
                   onClick={() => setGameState(prev => ({ ...prev, aiPlan: 'pro' }))}
-                  className={`flex-1 py-1 text-[10px] font-black ${gameState.aiPlan === 'pro' ? 'bg-blue-600 text-white' : 'text-zinc-700'}`}
+                  className={`flex-1 py-1 text-[10px] font-black transition-all ${gameState.aiPlan === 'pro' ? 'bg-indigo-600 text-white shadow-inner' : 'text-zinc-400 hover:text-indigo-400'}`}
                 >
                   PRO
                 </button>
@@ -539,9 +540,9 @@ function App() {
             </section>
 
             {!gameState.corporation && (
-              <button 
+              <button
                 onClick={() => doAction('incorporate')}
-                className="w-full py-3 bg-indigo-900 hover:bg-indigo-800 text-indigo-200 border-2 border-indigo-500 font-black text-[10px] transition-all flex items-center justify-center gap-2 active:translate-y-0.5"
+                className="w-full py-3 bg-white hover:bg-indigo-50 text-indigo-600 border-2 border-indigo-500 font-black text-[10px] transition-all flex items-center justify-center gap-2 active:translate-y-0.5 shadow-[4px_4px_0px_0px_rgba(79,70,229,0.1)]"
               >
                 <Building2 size={14} /> [ FOUNDATION ]
               </button>
@@ -549,32 +550,32 @@ function App() {
 
           </div>
         </div>
-        
+
         {/* Month Summary Screen */}
         {gameState.monthReport && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-            <div className="bg-zinc-900 border-4 border-white p-8 max-w-md w-full animate-in zoom-in-95 duration-200 shadow-[20px_20px_0px_0px_rgba(255,255,255,0.1)]">
-              <h2 className="text-2xl font-black mb-8 text-center text-white italic underline underline-offset-8 decoration-emerald-500">MONTHLY SUMMARY</h2>
-              
+          <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white border-4 border-zinc-900 p-8 max-w-md w-full animate-in zoom-in-95 duration-200 shadow-[20px_20px_0px_0px_rgba(0,0,0,0.1)]">
+              <h2 className="text-2xl font-black mb-8 text-center text-zinc-900 italic underline underline-offset-8 decoration-indigo-500">MONTHLY SUMMARY</h2>
+
               <div className="space-y-4 mb-10 font-mono">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-zinc-400 uppercase tracking-tighter">Income</span>
-                  <span className="text-emerald-500 font-bold">+¥{gameState.monthReport.income.toLocaleString()}</span>
+                  <span className="text-zinc-400 uppercase font-bold">Income</span>
+                  <span className="text-emerald-600 font-bold">+¥{gameState.monthReport.income.toLocaleString()}</span>
                 </div>
                 {gameState.monthReport.freelanceIncome > 0 && (
                   <div className="flex justify-between items-center text-[10px] pl-4">
-                    <span className="text-zinc-600">-- Freelance</span>
-                    <span className="text-emerald-700 font-bold">+¥{gameState.monthReport.freelanceIncome.toLocaleString()}</span>
+                    <span className="text-zinc-400">-- Freelance</span>
+                    <span className="text-emerald-500 font-bold">+¥{gameState.monthReport.freelanceIncome.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-zinc-400 uppercase tracking-tighter">Outgo</span>
+                  <span className="text-zinc-400 uppercase font-bold">Expenses</span>
                   <span className="text-red-500 font-bold">-¥{gameState.monthReport.expenses.toLocaleString()}</span>
                 </div>
-                <div className="h-px bg-zinc-700 my-2"></div>
+                <div className="h-px bg-zinc-100 my-2"></div>
                 <div className="flex justify-between items-center py-4">
-                  <span className="text-white font-black text-xs">NET_GAIN</span>
-                  <span className={`text-2xl font-black ${gameState.monthReport.netMoney >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                  <span className="text-zinc-900 font-black text-xs uppercase">Net Gain</span>
+                  <span className={`text-2xl font-black ${gameState.monthReport.netMoney >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                     {gameState.monthReport.netMoney >= 0 ? '+' : ''}¥{gameState.monthReport.netMoney.toLocaleString()}
                   </span>
                 </div>
@@ -582,9 +583,9 @@ function App() {
 
               <button
                 onClick={() => setGameState(prev => ({ ...prev, monthReport: null }))}
-                className="w-full bg-white text-black font-black py-4 hover:bg-zinc-300 transition-all text-sm"
+                className="w-full bg-zinc-900 text-white font-black py-4 hover:bg-zinc-800 transition-all text-sm border-b-4 border-black"
               >
-                CONTINUE_TO_NEXT_STAGE
+                NEXT STAGE
               </button>
             </div>
           </div>
