@@ -9,6 +9,7 @@ function App() {
     languages: { javascript: 0, python: 0, design: 0 },
     aiPlan: 'free', // 'free' or 'pro'
     followers: 0,
+    corporation: false, // 法人化フラグ
     actionsLeft: 2,
     jobs: [],
     selectedJob: null,
@@ -114,6 +115,14 @@ function App() {
         }
         newState.followers = Math.max(0, newState.followers + followChange);
         newState.mental += mentalChange;
+      } else if (action === 'incorporate') {
+        if (newState.money < 200000 || newState.languages.javascript < 1 || newState.languages.python < 1 || newState.languages.design < 1 || newState.followers < 500) {
+          newState.message = '法人化条件を満たしていません（所持金20万以上、各言語Lv1以上、フォロワー500以上）';
+          return prev;
+        }
+        newState.money -= 200000;
+        newState.corporation = true;
+        newState.message = '法人化しました！月固定費が10万円発生しますが、フォロワー収入が入ります';
       }
       return newState;
     });
@@ -137,6 +146,13 @@ function App() {
       // AI Pro サブスク
       if (newState.aiPlan === 'pro') {
         newState.money -= 50000;
+      }
+      // 法人化収益・固定費
+      if (newState.corporation) {
+        const corpRevenue = newState.followers * 100; // フォロワー1人あたり100円/月
+        newState.money += corpRevenue;
+        newState.money -= 100000; // 固定費（オフィス・人件費等）
+        newState.message += ` 法人収益+${corpRevenue}円, 固定費-100,000円`;
       }
       // 精神変動 (仮)
       // イベント判定
@@ -192,6 +208,7 @@ function App() {
           languages: { javascript: 0, python: 0, design: 0 },
           aiPlan: 'free',
           followers: 0,
+          corporation: false,
           actionsLeft: 2,
           jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
           selectedJob: null,
@@ -232,6 +249,7 @@ function App() {
           languages: { javascript: 0, python: 0, design: 0 },
           aiPlan: 'free',
           followers: 0,
+          corporation: false,
           actionsLeft: 2,
           jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
           selectedJob: null,
@@ -256,6 +274,7 @@ function App() {
         <p>デザイン: {gameState.languages.design}</p>
         <p>AI Plan: {gameState.aiPlan} ({gameState.aiPlan === 'pro' ? '月50,000円' : '無料'})</p>
         <p>フォロワー: {gameState.followers}</p>
+        <p>法人化: {gameState.corporation ? '済' : '未'}</p>
         <p>残行動: {gameState.actionsLeft}</p>
         <p>{gameState.message}</p>
       </div>
@@ -288,6 +307,13 @@ function App() {
         <button onClick={() => setGameState(prev => ({ ...prev, aiPlan: 'pro' }))}>Pro</button>
         <p>Pro: 精神消費-10, 成功率+10%, 月50,000円</p>
       </div>
+      {!gameState.corporation && gameState.money >= 200000 && gameState.languages.javascript >= 1 && gameState.languages.python >= 1 && gameState.languages.design >= 1 && gameState.followers >= 500 && (
+        <div>
+          <h3>法人化</h3>
+          <button onClick={() => doAction('incorporate')}>法人化する (200,000円)</button>
+          <p>条件: 所持金20万以上、各言語Lv1以上、フォロワー500以上</p>
+        </div>
+      )}
       <button onClick={endMonth} disabled={gameState.actionsLeft > 0}>月末処理</button>
     </div>
   );
