@@ -36,7 +36,7 @@ function App() {
     selectedJob: null,
     gameOver: false,
     endGame: false,
-    logs: [{ text: "SYSTEM: ゲームを開始しました。目標は12ヶ月で成功を収めることです。", type: "info" }],
+    logs: [{ text: "システム: ゲームを開始しました。目標は12ヶ月で成功を収めることです。", type: "info" }],
     monthReport: null,
   });
 
@@ -285,6 +285,13 @@ function App() {
     return 'bg-green-500';
   };
 
+  const getSkillDisplayName = (lang) => {
+    if (lang === 'javascript') return 'JavaScript';
+    if (lang === 'python') return 'Python';
+    if (lang === 'design') return 'デザイン';
+    return lang;
+  };
+
   if (gameState.gameOver) {
     return (
       <div className="min-h-screen bg-red-100 text-red-900 flex items-center justify-center p-6 font-mono">
@@ -338,7 +345,7 @@ function App() {
           <div className="flex flex-col items-center md:items-start justify-center">
             <h1 className="text-xl font-black tracking-widest flex items-center gap-2 text-zinc-900">
               <Sun size={24} className="text-yellow-500" />
-              DEPLOY_YOUR_LIFE.EXE
+              Deploy Your Life
             </h1>
           </div>
           <div className="flex justify-center items-center gap-4 bg-zinc-50 p-2 border border-zinc-200">
@@ -391,7 +398,7 @@ function App() {
                   <p className="text-[10px] text-zinc-400 font-bold uppercase">Skills_Tree</p>
                   {Object.entries(gameState.languages).map(([name, lv]) => (
                     <div key={name} className="flex justify-between items-center p-2 bg-zinc-50 border border-zinc-200 group hover:border-indigo-500 transition-colors">
-                      <span className="text-xs font-bold uppercase text-zinc-600">{name}</span>
+                      <span className="text-xs font-bold uppercase text-zinc-600">{getSkillDisplayName(name)}</span>
                       <div className="flex items-center gap-2">
                         <div className="flex gap-0.5">
                           {[...Array(5)].map((_, i) => (
@@ -441,7 +448,7 @@ function App() {
                         disabled={gameState.actionsLeft <= 0}
                         className="bg-zinc-50 hover:bg-indigo-50 border-2 border-zinc-200 hover:border-indigo-500 p-3 flex justify-between items-center group disabled:opacity-30 disabled:hover:bg-zinc-50 disabled:hover:border-zinc-200 transition-all active:translate-y-0.5"
                       >
-                        <span className="text-xs font-black uppercase text-zinc-700">{lang}</span>
+                        <span className="text-xs font-black uppercase text-zinc-700">{getSkillDisplayName(lang)}</span>
                         <Code size={16} className="text-zinc-400 group-hover:text-indigo-500" />
                       </button>
                     ))}

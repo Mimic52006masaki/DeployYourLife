@@ -4,7 +4,7 @@ export const QuestPanel = ({ gameState, doAction, setGameState }) => {
   return (
     <>
       <section className="bg-white border-2 border-zinc-900 p-4 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <h2 className="text-xs font-black bg-zinc-900 text-white px-2 py-1 inline-block mb-4">AVAILABLE_QUESTS</h2>
+        <h2 className="text-xs font-black bg-zinc-900 text-white px-2 py-1 inline-block mb-4">利用可能クエスト</h2>
         <div className="space-y-2">
           {gameState.jobs.map((job, index) => (
             <div
@@ -35,19 +35,19 @@ export const QuestPanel = ({ gameState, doAction, setGameState }) => {
 
       {/* AI Enhancement */}
       <section className="bg-white border-2 border-zinc-900 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <h2 className="text-xs font-black text-zinc-400 mb-3 uppercase flex items-center gap-2"><Rocket size={12}/> AI_BOOSTER</h2>
+        <h2 className="text-xs font-black text-zinc-400 mb-3 uppercase flex items-center gap-2"><Rocket size={12}/> AIブースター</h2>
         <div className="flex border-2 border-zinc-100 bg-zinc-50 p-1">
           <button
             onClick={() => setGameState(prev => ({ ...prev, aiPlan: 'free' }))}
             className={`flex-1 py-1 text-[10px] font-black transition-all ${gameState.aiPlan === 'free' ? 'bg-zinc-900 text-white shadow-inner' : 'text-zinc-400 hover:text-zinc-600'}`}
           >
-            FREE
+            無料
           </button>
           <button
             onClick={() => setGameState(prev => ({ ...prev, aiPlan: 'pro' }))}
             className={`flex-1 py-1 text-[10px] font-black transition-all ${gameState.aiPlan === 'pro' ? 'bg-indigo-600 text-white shadow-inner' : 'text-zinc-400 hover:text-indigo-400'}`}
           >
-            PRO
+            プロ
           </button>
         </div>
       </section>
@@ -57,7 +57,7 @@ export const QuestPanel = ({ gameState, doAction, setGameState }) => {
           onClick={() => doAction('incorporate')}
           className="w-full py-3 bg-white hover:bg-indigo-50 text-indigo-600 border-2 border-indigo-500 font-black text-[10px] transition-all flex items-center justify-center gap-2 active:translate-y-0.5 shadow-[4px_4px_0px_0px_rgba(79,70,229,0.1)]"
         >
-          <Building2 size={14} /> [ FOUNDATION ]
+          <Building2 size={14} /> [ 設立 ]
         </button>
       )}
     </>
