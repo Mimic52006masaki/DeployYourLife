@@ -6,7 +6,7 @@ function App() {
     job: 'バイト',
     money: 100000,
     mental: 30,
-    skill: 0,
+    languages: { javascript: 0, python: 0, design: 0 },
     actionsLeft: 2,
     jobs: [],
     selectedJob: null,
@@ -15,35 +15,51 @@ function App() {
     message: '',
   });
 
-  const generateJobs = () => {
-    const jobTypes = [
-      { name: 'バグ修正', skillReq: 0, reward: Math.floor(Math.random() * 30000) + 30000, mentalGain: 10 },
-      { name: 'LP制作', skillReq: 1, reward: Math.floor(Math.random() * 30000) + 50000, mentalGain: 15 },
-      { name: '新規Web開発', skillReq: 2, reward: Math.floor(Math.random() * 20000) + 80000, mentalGain: 25 },
-    ];
+  const generateJobs = (languages) => {
+    const jobPool = [];
+    if (languages.javascript > 0) {
+      jobPool.push({ name: 'LP制作 (JS)', lang: 'javascript', levelReq: 1, reward: Math.floor(Math.random() * 30000) + 50000, mentalGain: 15 });
+    }
+    if (languages.javascript >= 2) {
+      jobPool.push({ name: 'Web開発 (JS)', lang: 'javascript', levelReq: 2, reward: Math.floor(Math.random() * 20000) + 80000, mentalGain: 25 });
+    }
+    if (languages.python >= 1) {
+      jobPool.push({ name: 'API開発 (Python)', lang: 'python', levelReq: 1, reward: Math.floor(Math.random() * 40000) + 60000, mentalGain: 20 });
+    }
+    if (languages.python >= 2) {
+      jobPool.push({ name: 'データ分析 (Python)', lang: 'python', levelReq: 2, reward: Math.floor(Math.random() * 50000) + 100000, mentalGain: 30 });
+    }
+    if (languages.design >= 1) {
+      jobPool.push({ name: 'バナー制作', lang: 'design', levelReq: 1, reward: Math.floor(Math.random() * 20000) + 30000, mentalGain: 10 });
+    }
+    // 汎用案件（言語不要）
+    jobPool.push({ name: 'バグ修正', lang: null, levelReq: 0, reward: Math.floor(Math.random() * 30000) + 30000, mentalGain: 10 });
+
     const numJobs = Math.floor(Math.random() * 3) + 1;
     const selectedJobs = [];
-    for (let i = 0; i < numJobs; i++) {
-      selectedJobs.push(jobTypes[Math.floor(Math.random() * jobTypes.length)]);
+    for (let i = 0; i < numJobs && jobPool.length > 0; i++) {
+      const idx = Math.floor(Math.random() * jobPool.length);
+      selectedJobs.push(jobPool.splice(idx, 1)[0]);
     }
     return selectedJobs;
   };
 
-  const doAction = (action) => {
+  const doAction = (action, lang) => {
     if (gameState.actionsLeft <= 0) return;
     setGameState(prev => {
       let newState = { ...prev, actionsLeft: prev.actionsLeft - 1 };
       if (action === 'learn') {
-        newState.skill += 1;
+        newState.languages = { ...newState.languages };
+        newState.languages[lang] += 1;
         newState.money -= 20000;
         newState.mental += 5;
-        newState.message = '学習しました。スキル+1, 所持金-20,000円, 精神+5';
+        newState.message = `${lang}学習しました。${lang}レベル+1, 所持金-20,000円, 精神+5`;
       } else if (action === 'job') {
         if (!newState.selectedJob) return prev;
         const job = newState.selectedJob;
         let reward = job.reward;
         let success = true;
-        if (newState.skill < job.skillReq) {
+        if (job.lang && newState.languages[job.lang] < job.levelReq) {
           success = Math.random() > 0.5; // 失敗率
         }
         if (newState.mental >= 80) {
@@ -92,12 +108,12 @@ function App() {
       // 次月
       newState.month += 1;
       newState.actionsLeft = 2;
-      newState.jobs = generateJobs();
+      newState.jobs = generateJobs(newState.languages);
       if (newState.month > 12) {
         newState.endGame = true;
       }
       // キャリア変更
-      if (newState.job === 'バイト' && newState.money >= 300000 && newState.skill >= 1) {
+      if (newState.job === 'バイト' && newState.money >= 300000 && newState.languages.javascript >= 1) {
         newState.job = '会社員';
       }
       return newState;
@@ -119,7 +135,7 @@ function App() {
   };
 
   useEffect(() => {
-    setGameState(prev => ({ ...prev, jobs: generateJobs() }));
+    setGameState(prev => ({ ...prev, jobs: generateJobs(prev.languages) }));
   }, []);
 
   if (gameState.gameOver) {
@@ -132,9 +148,9 @@ function App() {
           job: 'バイト',
           money: 100000,
           mental: 30,
-          skill: 0,
+          languages: { javascript: 0, python: 0, design: 0 },
           actionsLeft: 2,
-          jobs: generateJobs(),
+          jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
           selectedJob: null,
           gameOver: false,
           endGame: false,
@@ -153,7 +169,9 @@ function App() {
       <div>
         <h1>エンディング</h1>
         <p>所持金: {gameState.money}</p>
-        <p>スキル: {gameState.skill}</p>
+        <p>JavaScript: {gameState.languages.javascript}</p>
+        <p>Python: {gameState.languages.python}</p>
+        <p>デザイン: {gameState.languages.design}</p>
         <p>精神: {gameState.mental}</p>
         <p>エンディング: {ending}</p>
         <button onClick={() => setGameState({
@@ -161,9 +179,9 @@ function App() {
           job: 'バイト',
           money: 100000,
           mental: 30,
-          skill: 0,
+          languages: { javascript: 0, python: 0, design: 0 },
           actionsLeft: 2,
-          jobs: generateJobs(),
+          jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
           selectedJob: null,
           gameOver: false,
           endGame: false,
@@ -181,12 +199,18 @@ function App() {
         <p>職業: {gameState.job}</p>
         <p>所持金: {gameState.money}円</p>
         <p>精神: {gameState.mental} {gameState.mental >= 60 ? (gameState.mental >= 80 ? '危険' : '注意') : '安定'}</p>
-        <p>スキル: {gameState.skill}</p>
+        <p>JavaScript: {gameState.languages.javascript}</p>
+        <p>Python: {gameState.languages.python}</p>
+        <p>デザイン: {gameState.languages.design}</p>
         <p>残行動: {gameState.actionsLeft}</p>
         <p>{gameState.message}</p>
       </div>
       <div>
-        <button onClick={() => doAction('learn')} disabled={gameState.actionsLeft <= 0}>学習</button>
+        <h3>言語学習</h3>
+        <button onClick={() => doAction('learn', 'javascript')} disabled={gameState.actionsLeft <= 0}>JavaScript</button>
+        <button onClick={() => doAction('learn', 'python')} disabled={gameState.actionsLeft <= 0}>Python</button>
+        <button onClick={() => doAction('learn', 'design')} disabled={gameState.actionsLeft <= 0}>デザイン</button>
+        <br />
         <button onClick={() => doAction('rest')} disabled={gameState.actionsLeft <= 0}>休養</button>
       </div>
       <div>
