@@ -62,6 +62,50 @@
 
 ---
 
+## 📁 プロジェクト構造
+
+### src/ ディレクトリ
+
+#### メインコンポーネント
+- **`App.jsx`**: メインアプリケーションコンポーネント
+  - ゲーム状態管理（useState）
+  - 全体レイアウトとUIレンダリング
+  - ゲームロジック（行動処理・月末計算・イベント判定）
+- **`main.jsx`**: Reactアプリケーションのエントリーポイント
+  - ReactDOM.render() の実行
+
+#### コンポーネント (`src/components/`)
+- **`CommandMenu.jsx`**: 行動選択メニュー
+  - 学習・SNS投稿・休養などのコマンドボタン
+  - アクション回数管理と無効化ロジック
+- **`HUD.jsx`**: ヘッダーUI（使用されていない）
+  - 月・アクション数・所持金の表示（現在App.jsxに統合）
+- **`QuestPanel.jsx`**: 副業案件パネル
+  - 利用可能案件の表示と選択
+  - AIブースター設定
+  - 法人化ボタン
+- **`StatusPanel.jsx`**: ステータスパネル（使用されていない）
+  - 精神・スキル・フォロワー表示（現在App.jsxに統合）
+- **`SystemLogs.jsx`**: システムログパネル（使用されていない）
+  - ゲームログの出力表示（現在App.jsxに統合）
+
+#### フック (`src/hooks/`)
+- **`useGameState.js`**: ゲーム状態管理フック（未使用）
+  - 将来的なカスタムフック実装用
+
+### 設定ファイル
+- **`package.json`**: プロジェクト設定
+  - 依存関係（React, Tailwind, Lucide Icons）
+  - ビルドスクリプト（dev, build, preview）
+- **`vite.config.js`**: Viteビルド設定
+- **`tailwind.config.js`**: Tailwind CSS設定
+- **`postcss.config.js`**: PostCSS設定
+- **`index.html`**: HTMLテンプレート
+
+### ドキュメント
+- **`README.md`**: プロジェクト説明（本ファイル）
+- **`deploy_your_life_roo_code用_開発指示書.md`**: 開発仕様書
+
 ## 🛠 技術スタック
 
 - **Frontend**: React 18 + Hooks
