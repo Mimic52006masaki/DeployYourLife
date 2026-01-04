@@ -79,11 +79,18 @@
 
 #### メインコンポーネント
 - **`App.jsx`**: メインアプリケーションコンポーネント
-  - ゲーム状態管理（useState）
+  - ゲーム状態管理（Context API）
   - 全体レイアウトとUIレンダリング
   - ゲームロジック（行動処理・月末計算・イベント判定）
 - **`main.jsx`**: Reactアプリケーションのエントリーポイント
   - ReactDOM.render() の実行
+  - GameStateProvider でアプリを包む
+
+#### Context (`src/contexts/`)
+- **`GameStateContext.jsx`**: ゲーム状態管理Context
+  - useReducer で集中管理
+  - アクション関数（learn/job/post/rest/incorporate）
+  - ログ管理・月末計算ロジック
 
 #### コンポーネント (`src/components/`)
 - **`CommandMenu.jsx`**: 行動選択メニュー
@@ -123,11 +130,12 @@
 - **Styling**: Tailwind CSS + Lucide Icons
 - **Build**: Vite
 - **Language**: JavaScript (ES6+)
-- **State**: useState (Redux不要のシンプル設計)
+- **State**: useReducer + Context API (スケーラブル設計)
 
 ### アーキテクチャの特徴
-- **関数コンポーネント + Hooks**
+- **関数コンポーネント + Hooks + Context**
 - **状態駆動UI**: 数値変化で自動UI更新
+- **Reducerパターン**: 予測可能なステート管理
 - **純関数設計**: テスト・拡張容易
 - **レスポンシブ**: モバイル対応
 
@@ -178,7 +186,20 @@ npm run dev
 - UIアニメーション統一（shadow, hover, active, disabled 挙動統一）
 - Tailwindクラス簡略化（clsx活用）
 
-### 🔄 v0.3（設計・実装予定）
+### ✅ v0.2.2（ステート管理リファクタリング完了）
+- **Context API + Reducer パターン** 導入
+- **gameState** をカテゴリ別構造化（player/economy/quests/ai/game）
+- **アクション関数分離**（learn/job/post/rest/incorporate）
+- **Props drilling 排除**、全コンポーネント Context 化
+- 保守性・拡張性大幅向上
+
+### 🔄 v0.3（ゲーム体験向上）
+- 月次報告モーダルのリッチ演出（グラフ/アニメーション）
+- AIプラン Pro/Free 効果強化
+- イベント演出強化（炎上/バズ画面フラッシュ）
+- ゲーム終了処理の強化（最終レポートチャート）
+
+### 🚀 v0.4（新機能追加）
 - 社員雇用システム
 - プロダクト開発と売上
 - 大型イベント（M&A / 炎上 / バズ）
