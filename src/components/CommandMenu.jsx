@@ -1,11 +1,14 @@
 import { Code, TrendingUp, Moon, Sparkles, MousePointer2 } from 'lucide-react';
 import { ActionButton } from './ActionButton';
+import { useGameState } from '../contexts/GameStateContext';
 
-export const CommandMenu = ({ gameState, doAction, endMonth, getSkillDisplayName }) => {
+export const CommandMenu = () => {
+  const { gameState, doAction, endMonth, getSkillDisplayName } = useGameState();
+
   const canPerformAction = (type, lang) => {
-    if (gameState.actionsLeft <= 0) return false;
-    if (type === 'learn' && gameState.money < 20000) return false;
-    if (type === 'job' && !gameState.selectedJob) return false;
+    if (gameState.economy.actionsLeft <= 0) return false;
+    if (type === 'learn' && gameState.economy.money < 20000) return false;
+    if (type === 'job' && !gameState.quests.selectedJob) return false;
     return true;
   };
 
@@ -14,7 +17,7 @@ export const CommandMenu = ({ gameState, doAction, endMonth, getSkillDisplayName
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-[10px] font-black bg-zinc-900 text-white px-2 py-1 uppercase tracking-tighter">Command_Menu</h2>
         <div className="text-[10px] font-black text-indigo-500 animate-pulse uppercase tracking-widest">
-          {gameState.actionsLeft > 0 ? 'Wait_Input...' : 'Actions_Consumed'}
+          {gameState.economy.actionsLeft > 0 ? 'Wait_Input...' : 'Actions_Consumed'}
         </div>
       </div>
 
@@ -68,7 +71,7 @@ export const CommandMenu = ({ gameState, doAction, endMonth, getSkillDisplayName
         </div>
       </div>
 
-      {gameState.actionsLeft <= 0 && (
+      {gameState.economy.actionsLeft <= 0 && (
         <div className="mt-12 pt-8 border-t-2 border-dashed border-zinc-100 text-center animate-in fade-in slide-in-from-bottom-2">
           <ActionButton onClick={endMonth} colorClasses="bg-indigo-600 hover:bg-indigo-500 text-white py-4 px-12 border-b-4 border-indigo-900 shadow-xl flex items-center justify-center gap-3">
             <Sparkles size={18} />

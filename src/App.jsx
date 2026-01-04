@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGameState } from './hooks/useGameState';
+import { useGameState } from './contexts/GameStateContext.jsx';
 import { HUD } from './components/HUD';
 import { StatusPanel } from './components/StatusPanel';
 import { CommandMenu } from './components/CommandMenu';
@@ -8,12 +8,7 @@ import { SystemLogs } from './components/SystemLogs';
 import { SummaryModal } from './components/SummaryModal';
 
 function App() {
-  const { gameState, doAction, endMonth, resetGame, getMentalEmoji, setGameState } = useGameState();
-
-  const getSkillDisplayName = (lang) => {
-    const names = { javascript: 'JavaScript', python: 'Python', design: 'デザイン' };
-    return names[lang] || lang;
-  };
+  const { gameState, doAction, endMonth, resetGame, getMentalEmoji, getSkillDisplayName, dispatch } = useGameState();
 
   if (gameState.gameOver) {
     return (
@@ -54,18 +49,18 @@ function App() {
 
           {/* Left Column: Status (Order 2 on mobile, 1 on PC) */}
           <div className="lg:col-span-3 space-y-6 order-2 lg:order-1">
-            <StatusPanel gameState={gameState} getMentalEmoji={getMentalEmoji} getSkillDisplayName={getSkillDisplayName} />
+            <StatusPanel />
             <SystemLogs gameState={gameState} />
           </div>
 
           {/* Middle Column: Actions (Order 1 on mobile, 2 on PC) */}
           <div className="lg:col-span-5 space-y-6 order-1 lg:order-2">
-            <CommandMenu gameState={gameState} doAction={doAction} endMonth={endMonth} getSkillDisplayName={getSkillDisplayName} />
+            <CommandMenu />
           </div>
 
           {/* Right Column: Quests & Boosters (Order 3) */}
           <div className="lg:col-span-4 space-y-6 order-3">
-            <JobList gameState={gameState} doAction={doAction} setGameState={setGameState} />
+            <JobList />
           </div>
         </div>
 

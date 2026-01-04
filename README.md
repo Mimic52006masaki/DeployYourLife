@@ -169,6 +169,15 @@ npm run dev
 - Tailwind CSS UI
 - 月次レポートモーダル
 
+### ✅ v0.2.1（UIリファクタリング完了）
+- **ActionButton** コンポーネントの導入（全ボタン統一）
+- **JobCard** コンポーネント化（ジョブ表示統一）
+- **SkillBar** 派手演出（レベルアップアニメーション）
+- **Mental Health** バー連続グラデーション（HSLベース）
+- **Mental Health** 低下警告アニメーション（点滅）
+- UIアニメーション統一（shadow, hover, active, disabled 挙動統一）
+- Tailwindクラス簡略化（clsx活用）
+
 ### 🔄 v0.3（設計・実装予定）
 - 社員雇用システム
 - プロダクト開発と売上

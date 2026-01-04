@@ -1,8 +1,10 @@
 import { SkillBar } from './SkillBar';
 import { ActionButton } from './ActionButton';
 import { useEffect, useState } from 'react';
+import { useGameState } from '../contexts/GameStateContext';
 
-export const StatusPanel = ({ gameState, getMentalEmoji, getSkillDisplayName }) => {
+export const StatusPanel = () => {
+  const { gameState, getMentalEmoji, getSkillDisplayName } = useGameState();
   const mapSkills = (languages) =>
     Object.entries(languages).map(([name, lv]) => ({
       name: getSkillDisplayName(name),
@@ -15,12 +17,12 @@ export const StatusPanel = ({ gameState, getMentalEmoji, getSkillDisplayName }) 
 
   useEffect(() => {
     // 幅の更新
-    setMentalWidth(100 - gameState.mental);
+    setMentalWidth(100 - gameState.player.mental);
 
     // HSLで色を滑らかに変化
-    const hue = (gameState.mental / 100) * 120; // 0%→0(hue:red), 100%→120(hue:green)
+    const hue = (gameState.player.mental / 100) * 120; // 0%→0(hue:red), 100%→120(hue:green)
     setMentalColor(`hsl(${hue},100%,50%)`);
-  }, [gameState.mental]);
+  }, [gameState.player.mental]);
 
   return (
     <section className="bg-white border-2 border-zinc-900 p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
@@ -38,7 +40,7 @@ export const StatusPanel = ({ gameState, getMentalEmoji, getSkillDisplayName }) 
           <div className="flex-1 ml-3 h-3 bg-zinc-100 rounded overflow-hidden border border-zinc-200">
             <div
               className={`h-full transition-all duration-700 ${
-                gameState.mental <= 20 ? 'animate-pulse' : ''
+                gameState.player.mental <= 20 ? 'animate-pulse' : ''
               }`}
               style={{ width: `${mentalWidth}%`, backgroundColor: mentalColor }}
             />
@@ -47,7 +49,7 @@ export const StatusPanel = ({ gameState, getMentalEmoji, getSkillDisplayName }) 
 
         {/* Skills */}
         <div className="space-y-2">
-          {mapSkills(gameState.languages).map((skill) => (
+          {mapSkills(gameState.player.languages).map((skill) => (
             <SkillBar key={skill.name} name={skill.name} level={skill.level} />
           ))}
         </div>
@@ -61,7 +63,7 @@ export const StatusPanel = ({ gameState, getMentalEmoji, getSkillDisplayName }) 
             sizeClasses="text-xs"
           >
             <span className="text-zinc-400 font-black uppercase">Followers</span>
-            <span className="text-sm font-black">{gameState.followers.toLocaleString()}</span>
+            <span className="text-sm font-black">{gameState.player.followers.toLocaleString()}</span>
           </ActionButton>
           <ActionButton
             onClick={() => {}}
@@ -70,7 +72,7 @@ export const StatusPanel = ({ gameState, getMentalEmoji, getSkillDisplayName }) 
             sizeClasses="text-xs"
           >
             <span className="text-zinc-400 font-black uppercase">Role</span>
-            <span className="text-sm font-black text-indigo-600 truncate">{gameState.job}</span>
+            <span className="text-sm font-black text-indigo-600 truncate">{gameState.player.job}</span>
           </ActionButton>
         </div>
       </div>
