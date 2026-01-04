@@ -28,25 +28,27 @@ const initialState = {
     logs: [{ text: "SYSTEM: ゲームを開始しました。目標は12ヶ月で成功を収めることです。", type: "info" }],
     monthReport: null,
     history: [],
+    employees: [],
+    monthlyRevenue: 0,
   },
 };
 
 const generateJobs = (languages) => {
   const jobPool = [];
   if (languages.javascript > 0) {
-    jobPool.push({ name: 'LP制作 (JS)', lang: 'javascript', levelReq: 1, reward: Math.floor(Math.random() * 30000) + 50000, mentalGain: 15 });
+    jobPool.push({ name: 'LP制作 (JS)', lang: 'javascript', levelReq: 1, reward: Math.floor(Math.random() * 30000) + 50000, mentalGain: 15, maxTeam: Math.floor(Math.random() * 3) + 2 });
   }
   if (languages.javascript >= 2) {
-    jobPool.push({ name: 'Web開発 (JS)', lang: 'javascript', levelReq: 2, reward: Math.floor(Math.random() * 20000) + 80000, mentalGain: 25 });
+    jobPool.push({ name: 'Web開発 (JS)', lang: 'javascript', levelReq: 2, reward: Math.floor(Math.random() * 20000) + 80000, mentalGain: 25, maxTeam: Math.floor(Math.random() * 3) + 2 });
   }
   if (languages.python >= 1) {
-    jobPool.push({ name: 'API開発 (Python)', lang: 'python', levelReq: 1, reward: Math.floor(Math.random() * 40000) + 60000, mentalGain: 20 });
+    jobPool.push({ name: 'API開発 (Python)', lang: 'python', levelReq: 1, reward: Math.floor(Math.random() * 40000) + 60000, mentalGain: 20, maxTeam: Math.floor(Math.random() * 3) + 2 });
   }
   if (languages.python >= 2) {
-    jobPool.push({ name: 'データ分析 (Python)', lang: 'python', levelReq: 2, reward: Math.floor(Math.random() * 50000) + 100000, mentalGain: 30 });
+    jobPool.push({ name: 'データ分析 (Python)', lang: 'python', levelReq: 2, reward: Math.floor(Math.random() * 50000) + 100000, mentalGain: 30, maxTeam: Math.floor(Math.random() * 3) + 2 });
   }
   if (languages.design >= 1) {
-    jobPool.push({ name: 'バナー制作', lang: 'design', levelReq: 1, reward: Math.floor(Math.random() * 20000) + 30000, mentalGain: 10 });
+    jobPool.push({ name: 'バナー制作', lang: 'design', levelReq: 1, reward: Math.floor(Math.random() * 20000) + 30000, mentalGain: 10, maxTeam: Math.floor(Math.random() * 3) + 2 });
   }
   jobPool.push({ name: 'デバッグ', lang: null, levelReq: 0, reward: Math.floor(Math.random() * 30000) + 30000, mentalGain: 10 });
 
@@ -81,6 +83,53 @@ const learnAction = (lang) => (state, addLog) => {
   return newState;
 };
 
+const hireEmployeeAction = (name, role) => (state, addLog) => {
+  if (state.economy.money < 50000) {
+    addLog("💰 お金が足りない！", "error");
+    return state;
+  }
+  const salaries = { Developer: 50000, Designer: 45000, Marketer: 40000 };
+  const salary = salaries[role] || 50000;
+  const specialties = ['javascript', 'python', 'design'];
+  const specialty = specialties[Math.floor(Math.random() * specialties.length)];
+  const newEmployee = {
+    id: Date.now().toString(),
+    name,
+    role,
+    skill: 50,
+    salary,
+    morale: 80,
+    level: 1,
+    exp: 0,
+    specialty,
+    lastAssignedMonth: 0,
+  };
+  const newState = {
+    ...state,
+    economy: { ...state.economy, money: state.economy.money - 50000 },
+    game: {
+      ...state.game,
+      employees: [...state.game.employees, newEmployee],
+    },
+  };
+  addLog(`社員 ${name} を雇用しました！`, "success");
+  return newState;
+};
+
+const fireEmployeeAction = (id) => (state, addLog) => {
+  const employee = state.game.employees.find(e => e.id === id);
+  if (!employee) return state;
+  const newState = {
+    ...state,
+    game: {
+      ...state.game,
+      employees: state.game.employees.filter(e => e.id !== id),
+    },
+  };
+  addLog(`社員 ${employee.name} を解雇しました。`, "info");
+  return newState;
+};
+
 const jobAction = (state, addLog) => {
   if (!state.quests.selectedJob) return state;
   const job = state.quests.selectedJob;
@@ -104,11 +153,63 @@ const jobAction = (state, addLog) => {
   const followerBonus = 1 + Math.min(state.player.followers / 1000, 1);
   reward = Math.floor(reward * followerBonus);
 
+  // Skill bonus (use assigned team or all employees)
+  const assignedEmployees = state.quests.assignedTeam ? state.game.employees.filter(emp => state.quests.assignedTeam.includes(emp.id)) : state.game.employees;
+  let skillBonus = 0;
+  if (job.lang === 'javascript' && assignedEmployees.some(emp => emp.role === 'Developer')) {
+    skillBonus = Math.floor(reward * 0.2);
+    reward += skillBonus;
+    addLog("Developer社員のスキルボーナス！", "success");
+  } else if (job.lang === 'python' && assignedEmployees.some(emp => emp.role === 'Developer')) {
+    skillBonus = Math.floor(reward * 0.15);
+    reward += skillBonus;
+    addLog("Developer社員のスキルボーナス！", "success");
+  } else if (job.lang === 'design' && assignedEmployees.some(emp => emp.role === 'Designer')) {
+    skillBonus = Math.floor(reward * 0.25);
+    reward += skillBonus;
+    addLog("Designer社員のスキルボーナス！", "success");
+  }
+
+  // Cooperation bonus
+  let coopBonus = 0;
+  const devCount = state.game.employees.filter(emp => emp.role === 'Developer').length;
+  const desCount = state.game.employees.filter(emp => emp.role === 'Designer').length;
+  if (devCount >= 2 && (job.lang === 'javascript' || job.lang === 'python')) {
+    coopBonus = Math.floor(reward * 0.1);
+    reward += coopBonus;
+    addLog(`複数Developer協力ボーナス！`, "success");
+  } else if (desCount >= 2 && job.lang === 'design') {
+    coopBonus = Math.floor(reward * 0.15);
+    reward += coopBonus;
+    addLog(`複数Designer協力ボーナス！`, "success");
+  }
+
+  // Specialty bonus
+  let specialtyBonus = 0;
+  if (assignedEmployees.some(emp => emp.specialty === job.lang)) {
+    specialtyBonus = Math.floor(reward * 0.05);
+    reward += specialtyBonus;
+    addLog(`得意スキル社員のスペシャルボーナス！`, "success");
+  }
+
+  // High difficulty job skill dependency
+  if (job.reward > 100000) {
+    const hasSkilledDev = state.game.employees.some(emp => emp.role === 'Developer' && emp.skill > 70);
+    const hasSkilledDes = state.game.employees.some(emp => emp.role === 'Designer' && emp.skill > 60);
+    if ((job.lang === 'javascript' || job.lang === 'python') && !hasSkilledDev) {
+      success = Math.random() > 0.7;
+      addLog("高額案件のため、スキル不足でリスク高め...", "warning");
+    } else if (job.lang === 'design' && !hasSkilledDes) {
+      success = Math.random() > 0.8;
+      addLog("高額デザイン案件のため、スキル不足でリスク高め...", "warning");
+    }
+  }
+
   const newState = {
     ...state,
     economy: { ...state.economy },
     player: { ...state.player },
-    quests: { ...state.quests, selectedJob: null },
+    quests: { ...state.quests, selectedJob: null, assignedTeam: null },
     game: { ...state.game }
   };
 
@@ -207,10 +308,16 @@ const endMonthLogic = (state, addLog) => {
     jobIncome: 0,
     freelanceIncome: newState.game.monthReport?.freelanceIncome || 0,
     corporationIncome: 0,
+    skillBonus: 0,
+    coopBonus: 0,
+    employeeIncome: 0,
+    employeeBonus: 0,
+    events: [],
     expensesBreakdown: {
       living: 0,
       pro: 0,
       corp: 0,
+      employee: 0,
     },
     mentalChange: 0,
     followerChange: 0,
@@ -255,6 +362,66 @@ const endMonthLogic = (state, addLog) => {
   }
 
   newState = checkEvents(newState, addLog);
+
+  // Employee logic
+  let employeeExpenses = 0;
+  let employeeRevenue = 0;
+  newState.game.employees = newState.game.employees.map(emp => {
+    employeeExpenses += emp.salary;
+    let empRevenue = Math.floor(emp.skill * (emp.morale / 100) * 10000);
+
+    // Employee events
+    if (Math.random() < 0.15) { // 15% chance
+      const eventRoll = Math.random();
+      let event = {};
+      if (eventRoll < 0.3) { // Skill boost
+        emp.skill = Math.min(100, emp.skill + 10);
+        event = { employee: emp.name, type: 'positive', description: 'スキルアップ！' };
+        addLog(`${emp.name} のスキルが向上しました！`, "success");
+      } else if (eventRoll < 0.6) { // Morale boost
+        emp.morale = Math.min(100, emp.morale + 10);
+        event = { employee: emp.name, type: 'positive', description: 'モラル向上！' };
+        addLog(`${emp.name} のモラルが向上しました！`, "success");
+      } else if (eventRoll < 0.8) { // Sick leave
+        empRevenue = 0; // No revenue this month
+        event = { employee: emp.name, type: 'negative', description: '病気休暇' };
+        addLog(`${emp.name} が病気で休暇を取りました...`, "warning");
+      } else { // Morale drop
+        emp.morale = Math.max(50, emp.morale - 10);
+        event = { employee: emp.name, type: 'negative', description: '不満爆発' };
+        addLog(`${emp.name} が不満を爆発させました...`, "error");
+      }
+      report.events.push(event);
+    }
+
+    employeeRevenue += empRevenue;
+
+    // Experience gain
+    emp.exp += Math.floor(100 * (emp.morale / 100));
+
+    // Level up check
+    const expRequired = emp.level * 1000;
+    if (emp.exp >= expRequired) {
+      emp.level += 1;
+      emp.skill = Math.min(100, emp.skill + 5);
+      emp.exp = 0;
+      report.events.push({ employee: emp.name, type: 'levelup', description: `レベルアップ！ Lv.${emp.level}` });
+      addLog(`${emp.name} がレベルアップしました！ Lv.${emp.level}`, "success");
+    }
+
+    return { ...emp, morale: Math.max(50, emp.morale - 5) };
+  });
+  // Employee bonus
+  const totalBonus = newState.game.employees.reduce((sum, emp) => sum + emp.level * 5000, 0);
+  newState.economy.money -= employeeExpenses;
+  newState.economy.money += employeeRevenue + totalBonus;
+  newState.game.monthlyRevenue = employeeRevenue + totalBonus;
+  report.employeeIncome = employeeRevenue;
+  report.employeeBonus = totalBonus;
+  report.expenses += employeeExpenses;
+  report.expensesBreakdown.employee += employeeExpenses;
+  report.income += employeeRevenue + totalBonus;
+
   report.mentalChange = newState.player.mental - state.player.mental;
   report.followerChange = newState.player.followers - state.player.followers;
   report.netMoney = newState.economy.money - state.economy.money;
@@ -294,6 +461,37 @@ const gameReducer = (state, action) => {
       return action.payload;
     case 'RESET':
       return initialState;
+    case 'DO_ACTION':
+      {
+        const { action: actionType, lang, name, role, id, addLog } = action.payload;
+        let newState = { ...state };
+        if (actionType === 'learn') {
+          newState = learnAction(lang)(newState, addLog);
+        } else if (actionType === 'job') {
+          newState = jobAction(newState, addLog);
+        } else if (actionType === 'rest') {
+          newState = restAction(newState, addLog);
+        } else if (actionType === 'post') {
+          newState = postAction(newState, addLog);
+        } else if (actionType === 'incorporate') {
+          newState = incorporateAction(newState, addLog);
+        } else if (actionType === 'hire') {
+          newState = hireEmployeeAction(name, role)(newState, addLog);
+        } else if (actionType === 'fire') {
+          newState = fireEmployeeAction(id)(newState, addLog);
+        }
+        newState = checkEvents(newState, addLog);
+        if (newState.economy.actionsLeft > 0 && actionType !== 'hire' && actionType !== 'fire') {
+          newState.economy.actionsLeft -= 1;
+        }
+        return newState;
+      }
+    case 'END_MONTH':
+      {
+        const { addLog } = action.payload;
+        const newState = endMonthLogic(state, addLog);
+        return newState;
+      }
     default:
       return state;
   }
@@ -302,12 +500,24 @@ const gameReducer = (state, action) => {
 export const GameStateProvider = ({ children }) => {
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
+  const addLog = (text, type) => {
+    dispatch({ type: 'ADD_LOG', payload: { text, type } });
+  };
+
   const doAction = (action, lang) => {
-    dispatch({ type: 'DO_ACTION', payload: { action, lang } });
+    dispatch({ type: 'DO_ACTION', payload: { action, lang, addLog } });
+  };
+
+  const hireEmployee = (name, role) => {
+    dispatch({ type: 'DO_ACTION', payload: { action: 'hire', name, role, addLog } });
+  };
+
+  const fireEmployee = (id) => {
+    dispatch({ type: 'DO_ACTION', payload: { action: 'fire', id, addLog } });
   };
 
   const endMonth = () => {
-    dispatch({ type: 'END_MONTH' });
+    dispatch({ type: 'END_MONTH', payload: { addLog } });
   };
 
   const resetGame = () => {
@@ -327,7 +537,7 @@ export const GameStateProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    dispatch({ type: 'END_MONTH' }); // or something to generate initial jobs
+    dispatch({ type: 'END_MONTH', payload: { addLog } }); // or something to generate initial jobs
   }, []);
 
   const value = {
@@ -338,6 +548,8 @@ export const GameStateProvider = ({ children }) => {
     getMentalEmoji,
     getSkillDisplayName,
     dispatch,
+    hireEmployee,
+    fireEmployee,
   };
 
   return <GameStateContext.Provider value={value}>{children}</GameStateContext.Provider>;

@@ -2,12 +2,22 @@ import { Rocket } from 'lucide-react';
 import { JobCard } from './JobCard';
 import { ActionButton } from './ActionButton';
 import { useGameState } from '../contexts/GameStateContext';
+import EmployeeList from './EmployeeList';
+import TeamAssignmentModal from './TeamAssignmentModal';
+import { useState } from 'react';
 
 export const JobList = () => {
   const { gameState, doAction, dispatch } = useGameState();
+  const [showTeamModal, setShowTeamModal] = useState(false);
 
   const selectAIPlan = (plan) => {
     dispatch({ type: 'UPDATE_STATE', payload: { ...gameState, ai: { plan } } });
+  };
+
+  const handleAssignTeam = (teamIds) => {
+    // Set assigned team and execute job
+    dispatch({ type: 'UPDATE_STATE', payload: { ...gameState, quests: { ...gameState.quests, assignedTeam: teamIds } } });
+    doAction('job');
   };
   return (
     <>
@@ -23,14 +33,24 @@ export const JobList = () => {
             />
           ))}
         </div>
-        {/* Accept Quest ボタンも ActionButton に統一 */}
-        <ActionButton
-          onClick={() => doAction('job')}
-          disabled={!gameState.quests.selectedJob || gameState.economy.actionsLeft <= 0}
-          colorClasses="mt-6 bg-emerald-500 hover:bg-emerald-400 text-white py-4 border-b-4 border-emerald-800 active:translate-y-1 active:border-b-0 transition-all uppercase tracking-widest text-sm"
-        >
-          Accept Quest
-        </ActionButton>
+        {/* Accept Quest / Team Assign ボタン */}
+        {gameState.quests.selectedJob?.reward > 100000 ? (
+          <ActionButton
+            onClick={() => setShowTeamModal(true)}
+            disabled={!gameState.quests.selectedJob || gameState.economy.actionsLeft <= 0}
+            colorClasses="mt-6 bg-purple-500 hover:bg-purple-400 text-white py-4 border-b-4 border-purple-800 active:translate-y-1 active:border-b-0 transition-all uppercase tracking-widest text-sm"
+          >
+            Team Assign
+          </ActionButton>
+        ) : (
+          <ActionButton
+            onClick={() => doAction('job')}
+            disabled={!gameState.quests.selectedJob || gameState.economy.actionsLeft <= 0}
+            colorClasses="mt-6 bg-emerald-500 hover:bg-emerald-400 text-white py-4 border-b-4 border-emerald-800 active:translate-y-1 active:border-b-0 transition-all uppercase tracking-widest text-sm"
+          >
+            Accept Quest
+          </ActionButton>
+        )}
       </section>
 
       <section className="bg-white border-2 border-zinc-900 p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
@@ -52,6 +72,10 @@ export const JobList = () => {
             Pro (¥50k)
           </ActionButton>
         </div>
+      </section>
+
+      <section className="bg-white border-2 border-zinc-900 p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <EmployeeList />
       </section>
     </>
   );

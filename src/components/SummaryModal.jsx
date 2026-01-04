@@ -35,19 +35,33 @@ export const SummaryModal = () => {
           {report.jobIncome > 0 && (
             <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500">
               <span className="text-zinc-400 uppercase font-bold">Job Income</span>
-              <span className="text-emerald-600 font-black">¥{report.jobIncome.toLocaleString()}</span>
+              <span className="text-emerald-600 font-black">¥{(report.jobIncome ?? 0).toLocaleString()}</span>
             </div>
           )}
           {report.freelanceIncome > 0 && (
             <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500 delay-100">
               <span className="text-zinc-400 uppercase font-bold">Freelance</span>
-              <span className={`font-black ${report.freelanceIncome > 100000 ? 'text-yellow-500 animate-pulse' : 'text-emerald-600'}`}>¥{report.freelanceIncome.toLocaleString()}</span>
+              <span className={`font-black ${report.freelanceIncome > 100000 ? 'text-yellow-500 animate-pulse' : 'text-emerald-600'}`}>¥{(report.freelanceIncome ?? 0).toLocaleString()}</span>
             </div>
           )}
           {report.corporationIncome > 0 && (
             <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500 delay-200">
               <span className="text-zinc-400 uppercase font-bold">Corporation</span>
-              <span className="text-indigo-600 font-black">¥{report.corporationIncome.toLocaleString()}</span>
+              <span className="text-indigo-600 font-black">¥{(report.corporationIncome ?? 0).toLocaleString()}</span>
+            </div>
+          )}
+          {report.employeeIncome > 0 && (
+            <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500 delay-300">
+              <span className="text-zinc-400 uppercase font-bold">Employee</span>
+              <span className={`font-black ${report.employeeIncome > 100000 ? 'text-yellow-500 animate-pulse' : 'text-indigo-600'}`}>
+                ¥{(report.employeeIncome ?? 0).toLocaleString()}
+              </span>
+            </div>
+          )}
+          {report.employeeBonus > 0 && (
+            <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500 delay-400">
+              <span className="text-zinc-400 uppercase font-bold">Employee Bonus</span>
+              <span className="text-purple-600 font-black">¥{(report.employeeBonus ?? 0).toLocaleString()}</span>
             </div>
           )}
         </div>
@@ -89,13 +103,13 @@ export const SummaryModal = () => {
         </div>
 
         {/* 過去6ヶ月のトレンド */}
-        <TrendChart history={gameState.game.history} />
+        {gameState.game.history.length > 0 && <TrendChart history={gameState.game.history} />}
 
         <div className="h-0.5 bg-zinc-900 my-6"></div>
         <div className="flex justify-between items-center mb-8">
           <span className="text-sm font-black uppercase">Net Result</span>
           <span className={`text-3xl font-black ${report.netMoney >= 0 ? "text-indigo-600" : "text-red-600"}`}>
-            ¥{report.netMoney.toLocaleString()}
+            ¥{(report.netMoney ?? 0).toLocaleString()}
           </span>
         </div>
         <button

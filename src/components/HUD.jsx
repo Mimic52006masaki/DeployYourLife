@@ -31,7 +31,7 @@ export const HUD = ({ gameState }) => {
 
       <div className="bg-yellow-50 px-6 py-2 border-2 border-yellow-500 flex items-center gap-4 w-full md:w-auto justify-center">
         <Coins size={20} className="text-yellow-600" />
-        <span className="text-2xl font-black">¥{gameState.money.toLocaleString()}</span>
+        <span className="text-2xl font-black">¥{(gameState.money ?? 0).toLocaleString()}</span>
       </div>
     </header>
   );

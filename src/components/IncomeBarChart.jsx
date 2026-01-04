@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 
 export const IncomeBarChart = ({ income, expenses }) => {
+  const safeIncome = income ?? 0;
+  const safeExpenses = expenses ?? 0;
+
   const [incomeWidth, setIncomeWidth] = useState(0);
   const [expensesWidth, setExpensesWidth] = useState(0);
 
   useEffect(() => {
     // アニメーションで棒を伸ばす
-    setTimeout(() => setIncomeWidth((income / (income + expenses)) * 100), 300);
-    setTimeout(() => setExpensesWidth((expenses / (income + expenses)) * 100), 600);
-  }, [income, expenses]);
+    const total = safeIncome + safeExpenses || 1;
+    setTimeout(() => setIncomeWidth((safeIncome / total) * 100), 300);
+    setTimeout(() => setExpensesWidth((safeExpenses / total) * 100), 600);
+  }, [safeIncome, safeExpenses]);
 
-  const maxValue = Math.max(income, expenses);
+  const maxValue = Math.max(safeIncome, safeExpenses);
 
   return (
     <div className="space-y-4">
@@ -26,7 +30,7 @@ export const IncomeBarChart = ({ income, expenses }) => {
               style={{ width: `${incomeWidth}%` }}
             />
           </div>
-          <span className="text-emerald-600 font-black text-sm w-20 text-right">¥{income.toLocaleString()}</span>
+          <span className="text-emerald-600 font-black text-sm w-20 text-right">¥{safeIncome.toLocaleString()}</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="flex-1 bg-zinc-100 h-6 border border-zinc-200 overflow-hidden">
@@ -35,7 +39,7 @@ export const IncomeBarChart = ({ income, expenses }) => {
               style={{ width: `${expensesWidth}%` }}
             />
           </div>
-          <span className="text-red-500 font-black text-sm w-20 text-right">¥{expenses.toLocaleString()}</span>
+          <span className="text-red-500 font-black text-sm w-20 text-right">¥{safeExpenses.toLocaleString()}</span>
         </div>
       </div>
     </div>

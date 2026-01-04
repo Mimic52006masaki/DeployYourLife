@@ -110,7 +110,7 @@ const TrendChart = ({ history }) => {
   return (
     <div className="w-full h-80 mt-6">
       <h3 className="text-lg font-bold text-gray-800 mb-4">過去6ヶ月のトレンド</h3>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" aspect={2} minWidth={0} minHeight={100}>
         <ComposedChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
