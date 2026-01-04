@@ -648,6 +648,8 @@ const endMonthLogic = (state, addLog) => {
     mentalChange: 0,
     followerChange: 0,
     netMoney: 0,
+    productDetails: [],
+    employeeDetails: [],
   };
 
   if (newState.game.phase === 'parttime') {
@@ -783,6 +785,9 @@ const endMonthLogic = (state, addLog) => {
 
       income = Math.floor(base * (followerScale * 0.6 + userScale * 0.4) * qualityBonus * buzz * developerMultiplier * marketerMultiplier * designerMultiplier);
       p.monthlyRevenue = income;
+
+      // Add to product details for monthly report
+      report.productDetails.push({ id: p.id, name: p.name, revenue: income });
     }
 
     productIncome += income;
@@ -858,6 +863,15 @@ const endMonthLogic = (state, addLog) => {
   report.expenses += employeeExpenses;
   report.expensesBreakdown.employee += employeeExpenses;
   report.income += employeeRevenue + totalBonus;
+
+  // Add employee details for monthly report
+  report.employeeDetails = newState.game.employees.map(emp => ({
+    id: emp.id,
+    name: emp.name,
+    role: emp.role,
+    level: emp.level,
+    bonus: emp.level * 5000,
+  }));
 
   report.mentalChange = newState.player.mental - state.player.mental;
   report.followerChange = newState.player.followers - state.player.followers;

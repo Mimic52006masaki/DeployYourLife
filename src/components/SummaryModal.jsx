@@ -72,6 +72,34 @@ export const SummaryModal = () => {
           )}
         </div>
 
+        {/* プロダクト別収益 */}
+        {report.productDetails && report.productDetails.length > 0 && (
+          <div className="space-y-2 mb-6">
+            <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400">Product Performance</h3>
+            {report.productDetails.map((product, index) => (
+              <div key={product.id} className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                <span className="text-zinc-400 uppercase font-bold truncate mr-2">{product.name}</span>
+                <span className="text-green-600 font-black">¥{product.revenue.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 社員別貢献 */}
+        {report.employeeDetails && report.employeeDetails.length > 0 && (
+          <div className="space-y-2 mb-6">
+            <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400">Employee Contributions</h3>
+            {report.employeeDetails.map((employee, index) => (
+              <div key={employee.id} className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                <span className="text-zinc-400 uppercase font-bold">
+                  {employee.name} (Lv.{employee.level} {employee.role})
+                </span>
+                <span className="text-purple-600 font-black">¥{employee.bonus.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* メンタル・フォロワー変化 */}
         <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="bg-zinc-50 p-4 border border-zinc-200 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
