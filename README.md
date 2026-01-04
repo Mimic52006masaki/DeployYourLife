@@ -106,6 +106,13 @@
   - 精神・スキル・フォロワー表示（現在App.jsxに統合）
 - **`SystemLogs.jsx`**: システムログパネル（使用されていない）
   - ゲームログの出力表示（現在App.jsxに統合）
+- **`SummaryModal.jsx`**: 月次レポートモーダル
+  - 収支グラフ・内訳表示・メンタル変化・フォロワー変化
+  - TrendChart統合（過去6ヶ月トレンド）
+  - アニメーション付きクローズ処理
+- **`TrendChart.jsx`**: トレンドチャートコンポーネント
+  - 過去6ヶ月分の収支・メンタル・フォロワー可視化
+  - ヒートマップ風Tooltip＋アニメーション
 
 #### フック (`src/hooks/`)
 - **`useGameState.js`**: ゲーム状態管理フック（未使用）
@@ -128,6 +135,7 @@
 
 - **Frontend**: React 18 + Hooks
 - **Styling**: Tailwind CSS + Lucide Icons
+- **Charts**: Recharts (過去トレンド可視化)
 - **Build**: Vite
 - **Language**: JavaScript (ES6+)
 - **State**: useReducer + Context API (スケーラブル設計)
@@ -202,6 +210,14 @@ npm run dev
 - AIプラン Pro/Free 効果強化（準備中）
 - イベント演出強化（準備中）
 - ゲーム終了処理の強化（準備中）
+
+### ✅ v0.3.1（TrendChart追加完了）
+- **TrendChartコンポーネント**の導入（過去6ヶ月トレンド可視化）
+- 収支内訳・メンタル・フォロワーの折れ線グラフ＋積み上げ棒グラフ
+- Rechartsライブラリ導入
+- 月次レポートモーダルにトレンドチャート統合
+- Tooltip強化: 変化率表示・前月比・ヒートマップ風アニメーション
+- 最新月バー強調アニメーション（フェード＋スライド＋伸びる）
 
 ### 🚀 v0.4（新機能追加）
 - 社員雇用システム

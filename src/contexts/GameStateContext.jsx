@@ -27,6 +27,7 @@ const initialState = {
     endGame: false,
     logs: [{ text: "SYSTEM: ゲームを開始しました。目標は12ヶ月で成功を収めることです。", type: "info" }],
     monthReport: null,
+    history: [],
   },
 };
 
@@ -206,7 +207,13 @@ const endMonthLogic = (state, addLog) => {
     jobIncome: 0,
     freelanceIncome: newState.game.monthReport?.freelanceIncome || 0,
     corporationIncome: 0,
+    expensesBreakdown: {
+      living: 0,
+      pro: 0,
+      corp: 0,
+    },
     mentalChange: 0,
+    followerChange: 0,
     netMoney: 0,
   };
 
@@ -224,14 +231,17 @@ const endMonthLogic = (state, addLog) => {
   if (newState.player.job === 'バイト') {
     newState.economy.money -= 100000;
     report.expenses += 100000;
+    report.expensesBreakdown.living += 100000;
   } else {
     newState.economy.money -= 180000;
     report.expenses += 180000;
+    report.expensesBreakdown.living += 180000;
   }
 
   if (newState.ai.plan === 'pro') {
     newState.economy.money -= 50000;
     report.expenses += 50000;
+    report.expensesBreakdown.pro += 50000;
   }
 
   if (newState.game.corporation) {
@@ -241,12 +251,15 @@ const endMonthLogic = (state, addLog) => {
     report.corporationIncome = corpRevenue;
     report.income += corpRevenue;
     report.expenses += 100000;
+    report.expensesBreakdown.corp += 100000;
   }
 
   newState = checkEvents(newState, addLog);
   report.mentalChange = newState.player.mental - state.player.mental;
+  report.followerChange = newState.player.followers - state.player.followers;
   report.netMoney = newState.economy.money - state.economy.money;
   newState.game.monthReport = report;
+  newState.game.history = [...newState.game.history, report].slice(-6);
 
   if (newState.economy.money <= 0) {
     newState.game.gameOver = true;

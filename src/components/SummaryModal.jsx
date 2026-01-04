@@ -1,5 +1,6 @@
 import { useGameState } from '../contexts/GameStateContext';
 import { IncomeBarChart } from './IncomeBarChart';
+import TrendChart from './TrendChart';
 import { TrendingUp, TrendingDown, Users, Heart } from 'lucide-react';
 import { useState } from 'react';
 
@@ -86,6 +87,9 @@ export const SummaryModal = () => {
             </div>
           </div>
         </div>
+
+        {/* 過去6ヶ月のトレンド */}
+        <TrendChart history={gameState.game.history} />
 
         <div className="h-0.5 bg-zinc-900 my-6"></div>
         <div className="flex justify-between items-center mb-8">

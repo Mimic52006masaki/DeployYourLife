@@ -64,7 +64,7 @@ function App() {
           </div>
         </div>
 
-        <SummaryModal gameState={gameState} setGameState={setGameState} />
+        <SummaryModal />
       </div>
     </div>
   );
