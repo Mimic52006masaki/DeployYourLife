@@ -57,6 +57,24 @@ export const ProductList = () => {
                 </div>
               </div>
 
+              <div className="text-xs mb-2">
+                <span className="text-zinc-400 font-bold uppercase">Assigned Employees:</span>
+                {(() => {
+                  const assignedEmployees = gameState.game.employees.filter(e => e.assignedProductId === product.id);
+                  return assignedEmployees.length > 0 ? (
+                    <div className="mt-1">
+                      {assignedEmployees.map(emp => (
+                        <span key={emp.id} className="inline-block bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs mr-1 mb-1">
+                          {emp.name} ({emp.role})
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="font-black text-gray-400 ml-1">None</span>
+                  );
+                })()}
+              </div>
+
               {product.stage === 'released' && !product.hasPayment && (
                 <p className="text-[10px] text-red-500 font-bold mt-1">
                   ⚠ ユーザーはいるが、収益化できていない
