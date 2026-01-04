@@ -200,6 +200,7 @@ const hireEmployeeAction = (name, role) => (state, addLog) => {
     level: 1,
     exp: 0,
     specialty,
+    assignedProductId: null,
     lastAssignedMonth: 0,
   };
   const newState = {
