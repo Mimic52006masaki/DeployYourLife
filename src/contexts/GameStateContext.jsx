@@ -729,6 +729,32 @@ const endMonthLogic = (state, addLog) => {
       p.users += userGrowth;
     }
 
+    // Failure checks for poor quality products
+    if (p.quality < 10 && p.users > 0) {
+      const churnRate = 0.05; // 5% churn per month
+      const churn = Math.floor(p.users * churnRate);
+      p.users -= churn;
+      if (churn > 0) {
+        addLog(`${p.name} の品質が低く、${churn}人のユーザーが離脱しました。`, 'warning');
+      }
+    }
+
+    if (p.users > 1000 && p.quality < 20) {
+      if (Math.random() < 0.1) { // 10% chance of flame
+        const flameLoss = Math.floor(p.users * 0.2);
+        p.users -= flameLoss;
+        addLog(`🔥 ${p.name} が炎上！ ${flameLoss}人のユーザーが離脱しました。`, 'error');
+      }
+    }
+
+    if (p.age > 6 && Math.random() < 0.15) { // Aging penalty
+      const abandon = Math.floor(p.users * 0.08);
+      p.users -= abandon;
+      if (abandon > 0) {
+        addLog(`${p.name} が古くなったため、${abandon}人のユーザーが離脱しました。`, 'warning');
+      }
+    }
+
     let income = 0;
     if (p.hasPayment) {
       // Count assigned employees by role for revenue multipliers
