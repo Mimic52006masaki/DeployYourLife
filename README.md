@@ -99,16 +99,22 @@ flowchart TD
 ```
 /src
 ├─ components/
+│  ├─ ActionButton.jsx
 │  ├─ CommandMenu.jsx
 │  ├─ EmployeeCard.jsx
 │  ├─ EmployeeList.jsx
-│  ├─ TeamAssignmentModal.jsx
+│  ├─ HUD.jsx
+│  ├─ IncomeBarChart.jsx
+│  ├─ JobCard.jsx
+│  ├─ JobList.jsx
+│  ├─ SkillBar.jsx
+│  ├─ StatusPanel.jsx
 │  ├─ SummaryModal.jsx
+│  ├─ SystemLogs.jsx
+│  ├─ TeamAssignmentModal.jsx
 │  └─ TrendChart.jsx
 ├─ contexts/
 │  └─ GameStateContext.jsx
-├─ hooks/
-│  └─ useGameState.js
 ├─ App.jsx
 └─ main.jsx
 ```
