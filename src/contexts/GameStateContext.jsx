@@ -716,6 +716,12 @@ const endMonthLogic = (state, addLog) => {
 
       userGrowth = Math.floor(userGrowth * growthMultiplier);
 
+      // Penalty for no marketer
+      if (marketerBonus === 0) {
+        userGrowth = Math.floor(userGrowth * 0.5);
+        addLog(`${p.name} にMarketerが配置されていないため、ユーザ成長が半減しました。`, "warning");
+      }
+
       if (Math.random() < buzzChance) {
         userGrowth *= 3;
         addLog(`🔥 ${p.name} がバズった！`, "success");
@@ -725,12 +731,31 @@ const endMonthLogic = (state, addLog) => {
 
     let income = 0;
     if (p.hasPayment) {
+      // Count assigned employees by role for revenue multipliers
+      const assignedEmployees = newState.game.employees.filter(e => e.assignedProductId === p.id);
+      const roleCounts = assignedEmployees.reduce((counts, emp) => {
+        counts[emp.role] = (counts[emp.role] || 0) + 1;
+        return counts;
+      }, {});
+
       const base = 100;
       const followerScale = Math.log10(newState.player.followers + 10);
       const userScale = Math.log10(p.users + 10);
       const qualityBonus = p.quality / 20;
       const buzz = Math.random() < 0.1 ? 5 : 1;
-      income = Math.floor(base * (followerScale * 0.6 + userScale * 0.4) * qualityBonus * buzz);
+
+      // Apply penalties for missing roles
+      if ((roleCounts.Developer || 0) === 0) {
+        p.quality = Math.max(0, p.quality - 1);
+        addLog(`${p.name} にDeveloperが配置されていないため、qualityが1下がりました。`, "warning");
+      }
+
+      // Role-based multipliers
+      const developerMultiplier = 1 + (roleCounts.Developer || 0) * 0.1; // +10% per developer
+      const marketerMultiplier = 1 + (roleCounts.Marketer || 0) * 0.2;  // +20% per marketer
+      const designerMultiplier = 1 + (roleCounts.Designer || 0) * 0.05; // +5% per designer
+
+      income = Math.floor(base * (followerScale * 0.6 + userScale * 0.4) * qualityBonus * buzz * developerMultiplier * marketerMultiplier * designerMultiplier);
       p.monthlyRevenue = income;
     }
 
@@ -754,8 +779,7 @@ const endMonthLogic = (state, addLog) => {
   let employeeRevenue = 0;
   newState.game.employees = newState.game.employees.map(emp => {
     employeeExpenses += emp.salary;
-    const assignedMultiplier = emp.assignedProductId ? 1 : 0.3;
-    let empRevenue = Math.floor(emp.skill * (emp.morale / 100) * 10000 * assignedMultiplier);
+    let empRevenue = 0; // Employees no longer generate direct revenue
 
     // Employee events
     if (Math.random() < 0.15) { // 15% chance
