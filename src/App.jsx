@@ -4,6 +4,7 @@ import { HUD } from './components/HUD';
 import { StatusPanel } from './components/StatusPanel';
 import { CommandMenu } from './components/CommandMenu';
 import { JobList } from './components/JobList';
+import { ProductList } from './components/ProductList';
 import { SystemLogs } from './components/SystemLogs';
 import { SummaryModal } from './components/SummaryModal';
 
@@ -30,7 +31,7 @@ function App() {
           <h1 className="text-4xl font-black mb-8 text-indigo-600">MISSION COMPLETE</h1>
           <div className="bg-indigo-50 p-6 border-2 border-indigo-200 mb-8">
             <p className="text-indigo-400 font-bold uppercase mb-2">Final Balance</p>
-            <p className="text-4xl font-black">¥{gameState.money.toLocaleString()}</p>
+            <p className="text-4xl font-black">¥{gameState.economy.money.toLocaleString()}</p>
           </div>
           <button onClick={resetGame} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 border-b-4 border-indigo-800 active:translate-y-1 transition-all">NEW GAME</button>
         </div>
@@ -61,6 +62,7 @@ function App() {
           {/* Right Column: Quests & Boosters (Order 3) */}
           <div className="lg:col-span-4 space-y-6 order-3">
             <JobList />
+            <ProductList />
           </div>
         </div>
 

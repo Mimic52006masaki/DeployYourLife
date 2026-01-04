@@ -15,8 +15,8 @@ export const HUD = ({ gameState }) => {
 
       <div className="flex items-center gap-6 bg-zinc-50 border border-zinc-200 px-6 py-2 w-full md:w-auto justify-center">
         <div className="text-center">
-          <p className="text-[10px] text-zinc-400 font-bold uppercase">Month</p>
-          <p className="text-xl font-black">{gameState.month}/12</p>
+          <p className="text-[10px] text-zinc-400 font-bold uppercase">Phase</p>
+          <p className="text-xl font-black">{gameState.game.phase.toUpperCase()}</p>
         </div>
         <div className="h-8 w-px bg-zinc-200"></div>
         <div className="text-center">
@@ -31,7 +31,7 @@ export const HUD = ({ gameState }) => {
 
       <div className="bg-yellow-50 px-6 py-2 border-2 border-yellow-500 flex items-center gap-4 w-full md:w-auto justify-center">
         <Coins size={20} className="text-yellow-600" />
-        <span className="text-2xl font-black">¥{(gameState.money ?? 0).toLocaleString()}</span>
+        <span className="text-2xl font-black">¥{(gameState.economy.money ?? 0).toLocaleString()}</span>
       </div>
     </header>
   );

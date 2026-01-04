@@ -64,6 +64,12 @@ export const SummaryModal = () => {
               <span className="text-purple-600 font-black">¥{(report.employeeBonus ?? 0).toLocaleString()}</span>
             </div>
           )}
+          {report.productIncome > 0 && (
+            <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500 delay-500">
+              <span className="text-zinc-400 uppercase font-bold">Product Income</span>
+              <span className="text-green-600 font-black">¥{(report.productIncome ?? 0).toLocaleString()}</span>
+            </div>
+          )}
         </div>
 
         {/* メンタル・フォロワー変化 */}

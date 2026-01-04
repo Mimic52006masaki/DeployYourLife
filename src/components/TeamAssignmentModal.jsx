@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameState } from '../contexts/GameStateContext';
-import ActionButton from './ActionButton';
+import { ActionButton } from './ActionButton';
 
 const TeamAssignmentModal = ({ job, onAssign, onClose }) => {
   const { gameState } = useGameState();

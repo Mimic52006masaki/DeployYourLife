@@ -8,6 +8,7 @@ export const CommandMenu = () => {
   const canPerformAction = (type, lang) => {
     if (gameState.economy.actionsLeft <= 0) return false;
     if (type === 'learn' && gameState.economy.money < 20000) return false;
+
     if (type === 'job' && !gameState.quests.selectedJob) return false;
     return true;
   };
@@ -21,7 +22,7 @@ export const CommandMenu = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Skill Development */}
         <div className="space-y-4">
           <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest">Skill_Development</p>
@@ -42,6 +43,23 @@ export const CommandMenu = () => {
           </div>
         </div>
 
+        {/* Product Development */}
+        <div className="space-y-4">
+          <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest">Product_Development</p>
+          <div className="grid grid-cols-1 gap-2">
+            <ActionButton
+              onClick={() => doAction('develop')}
+              disabled={!canPerformAction('develop')}
+              colorClasses="bg-zinc-50 hover:bg-white border-2 border-zinc-100 hover:border-green-500 flex justify-between items-center"
+            >
+              <span className="text-xs font-black uppercase">Develop App</span>
+              <div className="bg-white group-hover:bg-green-500 group-hover:text-white p-1 rounded border border-zinc-200 transition-colors">
+                <Sparkles size={14} />
+              </div>
+            </ActionButton>
+          </div>
+        </div>
+
         {/* Life Execution */}
         <div className="space-y-4">
           <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest">Life_Execution</p>
@@ -54,6 +72,8 @@ export const CommandMenu = () => {
               <p className="text-[8px] text-zinc-400 font-bold uppercase">Increase Influence</p>
             </div>
           </ActionButton>
+
+
 
           <ActionButton
             onClick={() => doAction('rest')}

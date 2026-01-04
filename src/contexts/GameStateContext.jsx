@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { PHASES, canDo } from '../phaseConfig';
 
 const GameStateContext = createContext();
 
@@ -14,7 +15,7 @@ const initialState = {
     actionsLeft: 2,
   },
   quests: {
-    jobs: [],
+    jobs: generateJobs({ javascript: 0, python: 0, design: 0 }),
     selectedJob: null,
   },
   ai: {
@@ -22,6 +23,7 @@ const initialState = {
   },
   game: {
     month: 1,
+    phase: 'student',
     corporation: false,
     gameOver: false,
     endGame: false,
@@ -30,10 +32,11 @@ const initialState = {
     history: [],
     employees: [],
     monthlyRevenue: 0,
+    products: [],
   },
 };
 
-const generateJobs = (languages) => {
+function generateJobs(languages) {
   const jobPool = [];
   if (languages.javascript > 0) {
     jobPool.push({ name: 'LP制作 (JS)', lang: 'javascript', levelReq: 1, reward: Math.floor(Math.random() * 30000) + 50000, mentalGain: 15, maxTeam: Math.floor(Math.random() * 3) + 2 });
@@ -59,7 +62,7 @@ const generateJobs = (languages) => {
     selectedJobs.push(jobPool.splice(idx, 1)[0]);
   }
   return selectedJobs;
-};
+}
 
 const learnAction = (lang) => (state, addLog) => {
   if (state.economy.money < 20000) {
@@ -81,6 +84,101 @@ const learnAction = (lang) => (state, addLog) => {
   newState.player.languages[lang] += 1;
   addLog(`📖 ${lang.toUpperCase()} LEVEL UP!`, "success");
   return newState;
+};
+
+const developProductAction = () => (state, addLog) => {
+  const jsLv = state.player.languages.javascript;
+
+  if (jsLv < 1) {
+    addLog("⚠️ JavaScript Lv1 が必要です", "error");
+    return state;
+  }
+
+  const newProduct = {
+    id: Date.now().toString(),
+    name: `MyApp-${state.game.products.length + 1}`,
+    stage: 'prototype',
+    hasPayment: false,
+    quality: 10 + jsLv * 5,
+    users: 0,
+    monthlyRevenue: 0,
+    age: 0,
+    lastBuzz: null,
+    marketingBonus: { buzzBoost: 0, userBoost: 0, flamePenalty: 0 },
+  };
+
+  addLog("🛠 アプリのプロトタイプを作成した！", "success");
+
+  return {
+    ...state,
+    game: {
+      ...state.game,
+      products: [...state.game.products, newProduct],
+    },
+  };
+};
+
+const deployProductAction = (id) => (state, addLog) => {
+  const product = state.game.products.find(p => p.id === id);
+
+  if (!product || product.stage !== 'prototype') {
+    addLog("❌ デプロイできるアプリがありません", "error");
+    return state;
+  }
+
+  const jsLv = state.player.languages.javascript;
+
+  const updated = {
+    ...product,
+    stage: 'released',
+    users: Math.floor(Math.random() * 50) + 10,
+    quality: Math.max(0, product.quality - 2), // Deploy penalty
+  };
+
+  addLog("🚀 アプリを公開した！（品質が2下がった）", "warning");
+
+  if (jsLv < 2) {
+    addLog("😇 決済機能がなく、収益は¥0…", "warning");
+  }
+
+  return {
+    ...state,
+    game: {
+      ...state.game,
+      products: state.game.products.map(p =>
+        p.id === id ? updated : p
+      ),
+    },
+  };
+};
+
+const sellProductAction = (id) => (state, addLog) => {
+  const product = state.game.products.find(p => p.id === id);
+  if (!product || product.stage !== 'monetized' || product.age < 12 || product.monthlyRevenue < 10000) {
+    addLog("❌ 売却条件を満たしていません", "error");
+    return state;
+  }
+
+  const baseValue = product.monthlyRevenue * product.age * 10; // 適当
+  const finalAmount = Math.min(baseValue, 5000000);
+
+  const updatedProducts = state.game.products.map(p =>
+    p.id === id ? { ...p, stage: 'sold' } : p
+  );
+
+  addLog(`💰 ${product.name} を売却！ ¥${finalAmount.toLocaleString()} 獲得`, "success");
+
+  return {
+    ...state,
+    economy: {
+      ...state.economy,
+      money: state.economy.money + finalAmount,
+    },
+    game: {
+      ...state.game,
+      products: updatedProducts,
+    },
+  };
 };
 
 const hireEmployeeAction = (name, role) => (state, addLog) => {
@@ -240,29 +338,194 @@ const restAction = (state, addLog) => {
 const postAction = (state, addLog) => {
   let followChange = 0;
   let mentalChange = 0;
+  let buzzType = null;
   const rand = Math.random();
   let proBonus = state.ai.plan === 'pro' ? 0.1 : 0;
   let flameRisk = 0.1 + (state.player.mental / 100) * 0.2 - proBonus;
+
+  // Select target product if available
+  const releasedProducts = state.game.products.filter(p => p.stage === 'released' || p.stage === 'monetized');
+  let targetProduct = null;
+  if (releasedProducts.length > 0) {
+    targetProduct = releasedProducts[Math.floor(Math.random() * releasedProducts.length)];
+  }
+
   if (rand < flameRisk) {
     followChange = -Math.floor(Math.random() * 70) - 30;
     mentalChange = 20;
+    buzzType = 'negative';
     addLog(`🔥 炎上発生！！ フォロワー急減`, "error");
+    if (targetProduct) {
+      targetProduct.users = Math.max(0, Math.floor(targetProduct.users * 0.7)); // 30% loss
+      addLog(`😱 ${targetProduct.name} のユーザーが激減...`, "error");
+      targetProduct.marketingBonus = { buzzBoost: 0, userBoost: 0, flamePenalty: 0 };
+    }
   } else if (rand < flameRisk + 0.2 + proBonus) {
     followChange = Math.floor(Math.random() * 100) + 50;
+    buzzType = 'positive';
     addLog(`🚀 バズった！拡散力が上昇`, "success");
+    if (targetProduct) {
+      targetProduct.users += Math.floor(Math.random() * 200) + 100;
+      addLog(`🎉 ${targetProduct.name} がバズ！ユーザー急増`, "success");
+      targetProduct.marketingBonus = { buzzBoost: 0, userBoost: 0, flamePenalty: 0 };
+    }
   } else {
     followChange = Math.floor(Math.random() * 10) + 5;
     addLog("📱 SNSに投稿した", "info");
+    if (targetProduct) {
+      targetProduct.users += Math.floor(Math.random() * 10) + 5 + (targetProduct.marketingBonus.userBoost || 0);
+      targetProduct.marketingBonus = { buzzBoost: 0, userBoost: 0, flamePenalty: 0 };
+    }
   }
+
   const newState = {
     ...state,
     player: {
       ...state.player,
       followers: Math.max(0, state.player.followers + followChange),
       mental: state.player.mental + mentalChange
+    },
+    game: {
+      ...state.game,
+      products: state.game.products.map(p =>
+        targetProduct && p.id === targetProduct.id ? targetProduct : p
+      ),
+      marketingBonus: { buzzBoost: 0, userBoost: 0, flamePenalty: 0 }
     }
   };
   return newState;
+};
+
+const fixBugAction = (id) => (state, addLog) => {
+  const product = state.game.products.find(p => p.id === id);
+
+  if (!product) return state;
+
+  const qualityBoost = Math.floor(Math.random() * 6) + 5; // 5-10
+
+  addLog("🛠 バグ修正に集中した。派手さはないが、土台が安定した。", "info");
+
+  return {
+    ...state,
+    player: {
+      ...state.player,
+      mental: state.player.mental + 10,
+    },
+    game: {
+      ...state.game,
+      products: state.game.products.map(p =>
+        p.id === id
+          ? { ...p, quality: p.quality + qualityBoost }
+          : p
+      ),
+    },
+  };
+};
+
+const uiImproveAction = (id) => (state, addLog) => {
+  const product = state.game.products.find(p => p.id === id);
+
+  if (!product) return state;
+
+  if (state.economy.money < 30000) {
+    addLog("💰 お金が足りない！", "error");
+    return state;
+  }
+
+  addLog("🎨 UIを改善。ユーザーの反応が明らかに良くなった。", "success");
+
+  return {
+    ...state,
+    player: {
+      ...state.player,
+      mental: state.player.mental + 5,
+    },
+    economy: {
+      ...state.economy,
+      money: state.economy.money - 30000,
+    },
+    game: {
+      ...state.game,
+      products: state.game.products.map(p =>
+        p.id === id
+          ? { ...p, quality: p.quality + 3, users: p.users + 10 }
+          : p
+      ),
+    },
+  };
+};
+
+const marketingAction = (id) => (state, addLog) => {
+  if (state.economy.money < 30000) {
+    addLog("💰 お金が足りない！", "error");
+    return state;
+  }
+
+  const product = state.game.products.find(p => p.id === id);
+  if (!product) return state;
+
+  const qualityAvg = state.game.products.length > 0 ? state.game.products.reduce((sum, p) => sum + p.quality, 0) / state.game.products.length : 0;
+  const successChance = Math.min(0.8, 0.5 + qualityAvg / 100);
+
+  let result;
+  if (Math.random() < successChance) {
+    result = 'buzzBoost';
+    addLog(`📢 ${product.name} のマーケティング施策を実行した。次回バズ確率 +20%！`, "success");
+  } else if (Math.random() < 0.5) {
+    result = 'userBoost';
+    addLog(`👀 ${product.name} の露出が増え、ユーザーが流入している…`, "info");
+  } else {
+    result = 'flamePenalty';
+    addLog(`🔥 ${product.name} の広告表現が炎上気味だ…`, "warning");
+  }
+
+  const bonus = {
+    buzzBoost: result === 'buzzBoost' ? 0.2 : 0,
+    userBoost: result === 'userBoost' ? Math.floor(Math.random() * 31) + 30 : 0, // 30-60
+    flamePenalty: result === 'flamePenalty' ? 0.1 : 0,
+  };
+
+  return {
+    ...state,
+    economy: {
+      ...state.economy,
+      money: state.economy.money - 30000,
+    },
+    game: {
+      ...state.game,
+      products: state.game.products.map(p =>
+        p.id === id ? { ...p, marketingBonus: bonus } : p
+      ),
+    },
+  };
+};
+
+const addPaymentAction = (id) => (state, addLog) => {
+  const product = state.game.products.find(p => p.id === id);
+
+  if (!product) return state;
+
+  if (
+    state.player.languages.javascript < 2 ||
+    state.player.languages.python < 1
+  ) {
+    addLog("⚠️ 決済実装スキルが足りない", "error");
+    return state;
+  }
+
+  addLog("💳 決済機能を実装！サブスク開始", "success");
+
+  return {
+    ...state,
+    game: {
+      ...state.game,
+      products: state.game.products.map(p =>
+        p.id === id
+          ? { ...p, hasPayment: true, stage: 'monetized' }
+          : p
+      ),
+    },
+  };
 };
 
 const incorporateAction = (state, addLog) => {
@@ -308,6 +571,7 @@ const endMonthLogic = (state, addLog) => {
     jobIncome: 0,
     freelanceIncome: newState.game.monthReport?.freelanceIncome || 0,
     corporationIncome: 0,
+    productIncome: 0,
     skillBonus: 0,
     coopBonus: 0,
     employeeIncome: 0,
@@ -324,18 +588,20 @@ const endMonthLogic = (state, addLog) => {
     netMoney: 0,
   };
 
-  if (newState.player.job === 'バイト') {
+  if (newState.game.phase === 'parttime') {
     const jobInc = Math.floor(Math.random() * 30000) + 120000;
     newState.economy.money += jobInc;
     report.jobIncome = jobInc;
     report.income += jobInc;
-  } else if (newState.player.job === '会社員') {
+  } else if (newState.game.phase === 'employee') {
     newState.economy.money += 220000;
     report.jobIncome = 220000;
     report.income += 220000;
   }
 
-  if (newState.player.job === 'バイト') {
+  if (newState.game.phase === 'student') {
+    // No expenses for student
+  } else if (newState.game.phase === 'parttime') {
     newState.economy.money -= 100000;
     report.expenses += 100000;
     report.expensesBreakdown.living += 100000;
@@ -362,6 +628,49 @@ const endMonthLogic = (state, addLog) => {
   }
 
   newState = checkEvents(newState, addLog);
+
+  // Product income calculation
+  let productIncome = 0;
+  newState.game.products = newState.game.products.map(p => {
+    if (p.stage === 'sold') return p;
+
+    p.age += 1;
+
+    // Users growth for released+
+    if (p.stage === 'released' || p.stage === 'monetized') {
+      let userGrowth = Math.floor(Math.random() * 20) + 5;
+      if (Math.random() < 0.1) {
+        userGrowth *= 3;
+        addLog(`🔥 ${p.name} がバズった！`, "success");
+      }
+      p.users += userGrowth;
+    }
+
+    let income = 0;
+    if (p.hasPayment) {
+      const base = 100;
+      const followerScale = Math.log10(newState.player.followers + 10);
+      const userScale = Math.log10(p.users + 10);
+      const qualityBonus = p.quality / 20;
+      const buzz = Math.random() < 0.1 ? 5 : 1;
+      income = Math.floor(base * (followerScale * 0.6 + userScale * 0.4) * qualityBonus * buzz);
+      p.monthlyRevenue = income;
+    }
+
+    productIncome += income;
+
+    // 寿命
+    if (p.age > 12 && Math.random() < 0.2) {
+      p.stage = 'sold';
+      addLog(`🪦 ${p.name} はサービス終了した`, "info");
+    }
+
+    return p;
+  });
+
+  newState.economy.money += productIncome;
+  report.income += productIncome;
+  report.productIncome = productIncome;
 
   // Employee logic
   let employeeExpenses = 0;
@@ -428,6 +737,22 @@ const endMonthLogic = (state, addLog) => {
   newState.game.monthReport = report;
   newState.game.history = [...newState.game.history, report].slice(-6);
 
+  // Phase transitions
+  if (newState.game.phase === 'student' && newState.economy.money >= 100000) {
+    newState.game.phase = 'parttime';
+    addLog("🚀 PHASE CHANGE: バイトフェーズへ移行！", "success");
+  } else if (newState.game.phase === 'parttime' && newState.player.languages.javascript >= 1) {
+    newState.game.phase = 'employee';
+    addLog("🚀 PHASE CHANGE: 会社員フェーズへ移行！", "success");
+  } else if (newState.game.phase === 'employee' && newState.economy.money >= 300000 && newState.player.languages.javascript >= 1) {
+    newState.game.phase = 'freelance';
+    addLog("🚀 PHASE CHANGE: フリーランスフェーズへ移行！", "success");
+  } else if (newState.game.phase === 'freelance' && newState.economy.money >= 200000 && newState.player.languages.javascript >= 1 && newState.player.languages.python >= 1 && newState.player.languages.design >= 1 && newState.player.followers >= 500) {
+    newState.game.phase = 'corporation';
+    newState.game.corporation = true;
+    addLog("🏢 PHASE CHANGE: 法人フェーズへ移行！会社設立！", "success");
+  }
+
   if (newState.economy.money <= 0) {
     newState.game.gameOver = true;
   }
@@ -435,13 +760,14 @@ const endMonthLogic = (state, addLog) => {
   newState.game.month += 1;
   newState.economy.actionsLeft = 2;
   newState.quests.jobs = generateJobs(newState.player.languages);
-  if (newState.game.month > 12) {
-    newState.game.endGame = true;
-  }
 
-  if (newState.player.job === 'バイト' && newState.economy.money >= 300000 && newState.player.languages.javascript >= 1) {
-    newState.player.job = '会社員';
-    addLog("🆙 JOB CHANGE: 会社員に昇格！", "success");
+  // End game conditions
+  if (newState.game.month > 36) {
+    newState.game.endGame = true;
+    addLog("⏰ 3年が経過しました。ゲーム終了。", "info");
+  } else if (newState.game.phase === 'corporation' && newState.economy.money >= 10000000) {
+    newState.game.endGame = true;
+    addLog("💰 経済的自由を達成しました！おめでとうございます。", "success");
   }
 
   return newState;
@@ -464,9 +790,27 @@ const gameReducer = (state, action) => {
     case 'DO_ACTION':
       {
         const { action: actionType, lang, name, role, id, addLog } = action.payload;
+        if (!canDo(actionType, state)) {
+          addLog(`🔒 ${PHASES[state.game.phase].label}フェーズでは実行できません`);
+          return state;
+        }
         let newState = { ...state };
         if (actionType === 'learn') {
           newState = learnAction(lang)(newState, addLog);
+        } else if (actionType === 'develop') {
+          newState = developProductAction()(newState, addLog);
+        } else if (actionType === 'deploy') {
+          newState = deployProductAction(lang)(newState, addLog);
+        } else if (actionType === 'sell') {
+          newState = sellProductAction(lang)(newState, addLog);
+        } else if (actionType === 'payment') {
+          newState = addPaymentAction(lang)(newState, addLog);
+        } else if (actionType === 'fix_bug') {
+          newState = fixBugAction(lang)(newState, addLog);
+        } else if (actionType === 'ui_improve') {
+          newState = uiImproveAction(lang)(newState, addLog);
+        } else if (actionType === 'marketing') {
+          newState = marketingAction(lang)(newState, addLog);
         } else if (actionType === 'job') {
           newState = jobAction(newState, addLog);
         } else if (actionType === 'rest') {
@@ -481,8 +825,9 @@ const gameReducer = (state, action) => {
           newState = fireEmployeeAction(id)(newState, addLog);
         }
         newState = checkEvents(newState, addLog);
+        const penalty = PHASES[state.game.phase].actionPenalty || 0;
         if (newState.economy.actionsLeft > 0 && actionType !== 'hire' && actionType !== 'fire') {
-          newState.economy.actionsLeft -= 1;
+          newState.economy.actionsLeft -= (1 + penalty);
         }
         return newState;
       }
@@ -492,6 +837,15 @@ const gameReducer = (state, action) => {
         const newState = endMonthLogic(state, addLog);
         return newState;
       }
+    case 'CHANGE_PHASE':
+      addLog(`🚀 ${PHASES[action.payload].label}フェーズに移行しました！`);
+      return {
+        ...state,
+        game: {
+          ...state.game,
+          phase: action.payload,
+        },
+      };
     default:
       return state;
   }
@@ -536,9 +890,7 @@ export const GameStateProvider = ({ children }) => {
     return names[lang] || lang;
   };
 
-  useEffect(() => {
-    dispatch({ type: 'END_MONTH', payload: { addLog } }); // or something to generate initial jobs
-  }, []);
+
 
   const value = {
     gameState: state,

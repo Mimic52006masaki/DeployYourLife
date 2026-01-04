@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGameState } from '../contexts/GameStateContext';
-import ActionButton from './ActionButton';
+import { ActionButton } from './ActionButton';
 
 const EmployeeCard = ({ employee }) => {
   const { fireEmployee } = useGameState();
@@ -48,7 +48,7 @@ const EmployeeCard = ({ employee }) => {
         </div>
       </div>
       <div className="mt-4">
-        <ActionButton onClick={handleFire} className="w-full bg-red-500 hover:bg-red-600">
+        <ActionButton onClick={handleFire} colorClasses="w-full bg-red-500 hover:bg-red-600 text-white">
           解雇
         </ActionButton>
       </div>

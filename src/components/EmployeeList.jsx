@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGameState } from '../contexts/GameStateContext';
 import EmployeeCard from './EmployeeCard';
-import ActionButton from './ActionButton';
+import { ActionButton } from './ActionButton';
 
 const EmployeeList = () => {
   const { gameState, hireEmployee } = useGameState();
