@@ -1,22 +1,16 @@
-export const SystemLogs = ({ logs }) => {
+import { Terminal } from 'lucide-react';
+
+export const SystemLogs = ({ gameState }) => {
   return (
-    <section className="bg-zinc-900 border-2 border-zinc-900 p-4 h-56 flex flex-col shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-        <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-        <span className="text-[10px] font-mono ml-2 text-zinc-500 uppercase tracking-widest">Live Output</span>
+    <section className="bg-zinc-900 p-5 text-zinc-500 h-64 flex flex-col shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]">
+      <div className="flex items-center gap-2 mb-4 border-b border-zinc-800 pb-2">
+        <Terminal size={14} />
+        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Log_Output</span>
       </div>
-      <div className="flex-1 overflow-y-auto space-y-1 pr-2 text-xs font-mono scrollbar-none">
-        {logs.map((log, i) => (
-          <div key={i} className={`flex items-start gap-2 ${
-            log.type === 'success' ? 'text-emerald-400' :
-            log.type === 'error' ? 'text-red-400 font-bold' :
-            log.type === 'warning' ? 'text-yellow-400' :
-            'text-zinc-400'
-          }`}>
-            <span>></span>
-            <span>{log.text}</span>
+      <div className="flex-1 overflow-y-auto space-y-2 scrollbar-none text-[10px] font-mono">
+        {gameState.logs.map((log, i) => (
+          <div key={i} className={`${log.type === 'success' ? 'text-emerald-400' : log.type === 'error' ? 'text-red-400' : 'text-zinc-500'}`}>
+            {'>'} {log.text}
           </div>
         ))}
       </div>
