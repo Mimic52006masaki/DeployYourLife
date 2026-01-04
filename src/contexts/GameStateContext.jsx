@@ -229,6 +229,39 @@ const fireEmployeeAction = (id) => (state, addLog) => {
   return newState;
 };
 
+const assignEmployeeAction = (employeeId, productId) => (state, addLog) => {
+  const employee = state.game.employees.find(e => e.id === employeeId);
+  if (!employee) return state;
+  const product = state.game.products.find(p => p.id === productId);
+  if (!product) return state;
+
+  let newAssignedProductId;
+  if (employee.assignedProductId === productId) {
+    // 同じプロダクトなら解除
+    newAssignedProductId = null;
+    addLog(`${employee.name} の ${product.name} からのアサインを解除しました。`, "info");
+  } else {
+    // 違うプロダクトならアサイン（自動解除）
+    newAssignedProductId = productId;
+    const oldProduct = employee.assignedProductId ? state.game.products.find(p => p.id === employee.assignedProductId) : null;
+    if (oldProduct) {
+      addLog(`${employee.name} の ${oldProduct.name} からのアサインを解除し、${product.name} にアサインしました。`, "success");
+    } else {
+      addLog(`${employee.name} を ${product.name} にアサインしました。`, "success");
+    }
+  }
+
+  return {
+    ...state,
+    game: {
+      ...state.game,
+      employees: state.game.employees.map(e =>
+        e.id === employeeId ? { ...e, assignedProductId: newAssignedProductId } : e
+      ),
+    },
+  };
+};
+
 const jobAction = (state, addLog) => {
   if (!state.quests.selectedJob) return state;
   const job = state.quests.selectedJob;
@@ -824,10 +857,12 @@ const gameReducer = (state, action) => {
           newState = hireEmployeeAction(name, role)(newState, addLog);
         } else if (actionType === 'fire') {
           newState = fireEmployeeAction(id)(newState, addLog);
+        } else if (actionType === 'assign_employee') {
+          newState = assignEmployeeAction(name, role)(newState, addLog);
         }
         newState = checkEvents(newState, addLog);
         const penalty = PHASES[state.game.phase].actionPenalty || 0;
-        if (newState.economy.actionsLeft > 0 && actionType !== 'hire' && actionType !== 'fire') {
+        if (newState.economy.actionsLeft > 0 && actionType !== 'hire' && actionType !== 'fire' && actionType !== 'assign_employee') {
           newState.economy.actionsLeft -= (1 + penalty);
         }
         return newState;

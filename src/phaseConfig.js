@@ -59,6 +59,7 @@ export const PHASES = {
       'job',
       'high_task',
       'hire',
+      'assign_employee',
       'develop',
       'deploy',
       'payment',
@@ -73,6 +74,7 @@ export const PHASES = {
     label: '法人',
     can: [
       'hire',
+      'assign_employee',
       'corp_task',
       'auto_income',
       'develop',
