@@ -1,6 +1,22 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { PHASES, canDo } from '../phaseConfig';
 
+// Role effects on products
+const ROLE_EFFECTS = {
+  Developer: {
+    qualityBonus: 2,      // +2 quality per developer
+    bugFixBonus: 1.5,     // bug fix efficiency multiplier
+  },
+  Designer: {
+    uiBonus: 1.5,         // UI improvement multiplier
+    flameResist: 0.2,     // reduce flame risk by 0.2 per designer
+  },
+  Marketer: {
+    buzzChance: 0.15,     // +15% buzz chance per marketer
+    userGrowth: 0.3,      // +30% user growth multiplier per marketer
+  },
+};
+
 const GameStateContext = createContext();
 
 const initialState = {
@@ -435,9 +451,12 @@ const fixBugAction = (id) => (state, addLog) => {
 
   if (!product) return state;
 
-  const qualityBoost = Math.floor(Math.random() * 6) + 5; // 5-10
+  // Count assigned developers for bonus
+  const assignedDevelopers = state.game.employees.filter(e => e.assignedProductId === id && e.role === 'Developer').length;
+  const bugFixBonus = assignedDevelopers > 0 ? ROLE_EFFECTS.Developer.bugFixBonus : 1;
+  const qualityBoost = Math.floor((Math.floor(Math.random() * 6) + 5) * bugFixBonus); // 5-10 * bonus
 
-  addLog("🛠 バグ修正に集中した。派手さはないが、土台が安定した。", "info");
+  addLog(`🛠 バグ修正に集中した${assignedDevelopers > 0 ? ` (Developer ×${assignedDevelopers})` : ''}。派手さはないが、土台が安定した。`, "info");
 
   return {
     ...state,
@@ -466,7 +485,13 @@ const uiImproveAction = (id) => (state, addLog) => {
     return state;
   }
 
-  addLog("🎨 UIを改善。ユーザーの反応が明らかに良くなった。", "success");
+  // Count assigned designers for bonus
+  const assignedDesigners = state.game.employees.filter(e => e.assignedProductId === id && e.role === 'Designer').length;
+  const uiBonus = assignedDesigners > 0 ? ROLE_EFFECTS.Designer.uiBonus : 1;
+  const userBonus = Math.floor(10 * uiBonus);
+  const qualityBonus = 3; // Keep base
+
+  addLog(`🎨 UIを改善${assignedDesigners > 0 ? ` (Designer ×${assignedDesigners})` : ''}。ユーザーの反応が明らかに良くなった。`, "success");
 
   return {
     ...state,
@@ -482,7 +507,7 @@ const uiImproveAction = (id) => (state, addLog) => {
       ...state.game,
       products: state.game.products.map(p =>
         p.id === id
-          ? { ...p, quality: p.quality + 3, users: p.users + 10 }
+          ? { ...p, quality: p.quality + qualityBonus, users: p.users + userBonus }
           : p
       ),
     },
@@ -498,13 +523,16 @@ const marketingAction = (id) => (state, addLog) => {
   const product = state.game.products.find(p => p.id === id);
   if (!product) return state;
 
+  // Count assigned marketers for bonus
+  const assignedMarketers = state.game.employees.filter(e => e.assignedProductId === id && e.role === 'Marketer').length;
   const qualityAvg = state.game.products.length > 0 ? state.game.products.reduce((sum, p) => sum + p.quality, 0) / state.game.products.length : 0;
-  const successChance = Math.min(0.8, 0.5 + qualityAvg / 100);
+  const baseSuccessChance = Math.min(0.8, 0.5 + qualityAvg / 100);
+  const successChance = Math.min(1, baseSuccessChance + assignedMarketers * ROLE_EFFECTS.Marketer.buzzChance);
 
   let result;
   if (Math.random() < successChance) {
     result = 'buzzBoost';
-    addLog(`📢 ${product.name} のマーケティング施策を実行した。次回バズ確率 +20%！`, "success");
+    addLog(`📢 ${product.name} のマーケティング施策を実行した${assignedMarketers > 0 ? ` (Marketer ×${assignedMarketers})` : ''}。次回バズ確率 +20%！`, "success");
   } else if (Math.random() < 0.5) {
     result = 'userBoost';
     addLog(`👀 ${product.name} の露出が増え、ユーザーが流入している…`, "info");
@@ -672,8 +700,23 @@ const endMonthLogic = (state, addLog) => {
 
     // Users growth for released+
     if (p.stage === 'released' || p.stage === 'monetized') {
+      // Count assigned employees by role
+      const assignedEmployees = newState.game.employees.filter(e => e.assignedProductId === p.id);
+      const roleCounts = assignedEmployees.reduce((counts, emp) => {
+        counts[emp.role] = (counts[emp.role] || 0) + 1;
+        return counts;
+      }, {});
+
       let userGrowth = Math.floor(Math.random() * 20) + 5;
-      if (Math.random() < 0.1) {
+
+      // Marketer effect: increase buzz chance and user growth
+      const marketerBonus = roleCounts.Marketer || 0;
+      const buzzChance = 0.1 + marketerBonus * ROLE_EFFECTS.Marketer.buzzChance;
+      const growthMultiplier = 1 + marketerBonus * ROLE_EFFECTS.Marketer.userGrowth;
+
+      userGrowth = Math.floor(userGrowth * growthMultiplier);
+
+      if (Math.random() < buzzChance) {
         userGrowth *= 3;
         addLog(`🔥 ${p.name} がバズった！`, "success");
       }
