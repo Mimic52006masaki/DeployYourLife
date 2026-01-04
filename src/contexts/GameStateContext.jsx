@@ -711,7 +711,8 @@ const endMonthLogic = (state, addLog) => {
   let employeeRevenue = 0;
   newState.game.employees = newState.game.employees.map(emp => {
     employeeExpenses += emp.salary;
-    let empRevenue = Math.floor(emp.skill * (emp.morale / 100) * 10000);
+    const assignedMultiplier = emp.assignedProductId ? 1 : 0.3;
+    let empRevenue = Math.floor(emp.skill * (emp.morale / 100) * 10000 * assignedMultiplier);
 
     // Employee events
     if (Math.random() < 0.15) { // 15% chance
