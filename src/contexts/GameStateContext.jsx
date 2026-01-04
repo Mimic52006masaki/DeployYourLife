@@ -824,28 +824,28 @@ const gameReducer = (state, action) => {
       return initialState;
     case 'DO_ACTION':
       {
-        const { action: actionType, lang, name, role, id, addLog } = action.payload;
+        const { action: actionType, addLog, ...rest } = action.payload;
         if (!canDo(actionType, state)) {
           addLog(`🔒 ${PHASES[state.game.phase].label}フェーズでは実行できません`);
           return state;
         }
         let newState = { ...state };
         if (actionType === 'learn') {
-          newState = learnAction(lang)(newState, addLog);
+          newState = learnAction(rest.lang)(newState, addLog);
         } else if (actionType === 'develop') {
           newState = developProductAction()(newState, addLog);
         } else if (actionType === 'deploy') {
-          newState = deployProductAction(lang)(newState, addLog);
+          newState = deployProductAction(rest.id)(newState, addLog);
         } else if (actionType === 'sell') {
-          newState = sellProductAction(lang)(newState, addLog);
+          newState = sellProductAction(rest.id)(newState, addLog);
         } else if (actionType === 'payment') {
-          newState = addPaymentAction(lang)(newState, addLog);
+          newState = addPaymentAction(rest.id)(newState, addLog);
         } else if (actionType === 'fix_bug') {
-          newState = fixBugAction(lang)(newState, addLog);
+          newState = fixBugAction(rest.id)(newState, addLog);
         } else if (actionType === 'ui_improve') {
-          newState = uiImproveAction(lang)(newState, addLog);
+          newState = uiImproveAction(rest.id)(newState, addLog);
         } else if (actionType === 'marketing') {
-          newState = marketingAction(lang)(newState, addLog);
+          newState = marketingAction(rest.id)(newState, addLog);
         } else if (actionType === 'job') {
           newState = jobAction(newState, addLog);
         } else if (actionType === 'rest') {
@@ -855,11 +855,11 @@ const gameReducer = (state, action) => {
         } else if (actionType === 'incorporate') {
           newState = incorporateAction(newState, addLog);
         } else if (actionType === 'hire') {
-          newState = hireEmployeeAction(name, role)(newState, addLog);
+          newState = hireEmployeeAction(rest.name, rest.role)(newState, addLog);
         } else if (actionType === 'fire') {
-          newState = fireEmployeeAction(id)(newState, addLog);
+          newState = fireEmployeeAction(rest.id)(newState, addLog);
         } else if (actionType === 'assign_employee') {
-          newState = assignEmployeeAction(name, role)(newState, addLog);
+          newState = assignEmployeeAction(rest.employeeId, rest.productId)(newState, addLog);
         }
         newState = checkEvents(newState, addLog);
         const penalty = PHASES[state.game.phase].actionPenalty || 0;
@@ -895,16 +895,16 @@ export const GameStateProvider = ({ children }) => {
     dispatch({ type: 'ADD_LOG', payload: { text, type } });
   };
 
-  const doAction = (action, lang) => {
-    dispatch({ type: 'DO_ACTION', payload: { action, lang, addLog } });
+  const doAction = (action, payload = {}) => {
+    dispatch({ type: 'DO_ACTION', payload: { action, ...payload, addLog } });
   };
 
   const hireEmployee = (name, role) => {
-    dispatch({ type: 'DO_ACTION', payload: { action: 'hire', name, role, addLog } });
+    doAction('hire', { name, role });
   };
 
   const fireEmployee = (id) => {
-    dispatch({ type: 'DO_ACTION', payload: { action: 'fire', id, addLog } });
+    doAction('fire', { id });
   };
 
   const endMonth = () => {

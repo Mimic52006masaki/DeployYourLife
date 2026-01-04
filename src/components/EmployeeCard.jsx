@@ -79,7 +79,7 @@ const EmployeeCard = ({ employee }) => {
                   <button
                     key={product.id}
                     onClick={() => {
-                      doAction('assign_employee', employee.id, product.id);
+                      doAction('assign_employee', { employeeId: employee.id, productId: product.id });
                       setIsAssignModalOpen(false);
                     }}
                     className="w-full text-left p-2 border rounded hover:bg-gray-100"
@@ -91,7 +91,7 @@ const EmployeeCard = ({ employee }) => {
               {employee.assignedProductId && (
                 <button
                   onClick={() => {
-                    doAction('assign_employee', employee.id, employee.assignedProductId);
+                    doAction('assign_employee', { employeeId: employee.id, productId: employee.assignedProductId });
                     setIsAssignModalOpen(false);
                   }}
                   className="w-full text-left p-2 border rounded bg-red-50 hover:bg-red-100 text-red-600"

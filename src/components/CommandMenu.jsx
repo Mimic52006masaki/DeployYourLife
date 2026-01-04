@@ -30,7 +30,7 @@ export const CommandMenu = () => {
             {['javascript', 'python', 'design'].map(lang => (
               <ActionButton
                 key={lang}
-                onClick={() => doAction('learn', lang)}
+                onClick={() => doAction('learn', { lang })}
                 disabled={!canPerformAction('learn', lang)}
                 colorClasses="bg-zinc-50 hover:bg-white border-2 border-zinc-100 hover:border-indigo-500 flex justify-between items-center"
               >

@@ -84,7 +84,7 @@ export const ProductList = () => {
               <div className="flex flex-wrap gap-2">
                 {product.stage === 'prototype' && (
                   <ActionButton
-                    onClick={() => doAction('deploy', product.id)}
+                    onClick={() => doAction('deploy', { id: product.id })}
                     colorClasses="bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-500 text-blue-600 hover:text-blue-700 py-2 px-4 text-xs font-black uppercase"
                   >
                     DEPLOY
@@ -92,7 +92,7 @@ export const ProductList = () => {
                 )}
                 {product.stage === 'released' && (
                   <ActionButton
-                    onClick={() => doAction('payment', product.id)}
+                    onClick={() => doAction('payment', { id: product.id })}
                     colorClasses="bg-purple-50 hover:bg-purple-100 border-2 border-purple-200 hover:border-purple-500 text-purple-600 hover:text-purple-700 py-2 px-4 text-xs font-black uppercase"
                   >
                     ADD PAYMENT
@@ -101,19 +101,19 @@ export const ProductList = () => {
                 {(product.stage === 'released' || product.stage === 'monetized') && (
                   <>
                     <ActionButton
-                      onClick={() => doAction('fix_bug', product.id)}
+                      onClick={() => doAction('fix_bug', { id: product.id })}
                       colorClasses="bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 hover:border-orange-500 text-orange-600 hover:text-orange-700 py-2 px-4 text-xs font-black uppercase"
                     >
                       FIX BUG
                     </ActionButton>
                     <ActionButton
-                      onClick={() => doAction('ui_improve', product.id)}
+                      onClick={() => doAction('ui_improve', { id: product.id })}
                       colorClasses="bg-green-50 hover:bg-green-100 border-2 border-green-200 hover:border-green-500 text-green-600 hover:text-green-700 py-2 px-4 text-xs font-black uppercase"
                     >
                       UI IMPROVE
                     </ActionButton>
                     <ActionButton
-                      onClick={() => doAction('marketing', product.id)}
+                      onClick={() => doAction('marketing', { id: product.id })}
                       colorClasses="bg-pink-50 hover:bg-pink-100 border-2 border-pink-200 hover:border-pink-500 text-pink-600 hover:text-pink-700 py-2 px-4 text-xs font-black uppercase"
                     >
                       MARKETING
@@ -122,7 +122,7 @@ export const ProductList = () => {
                 )}
                 {product.stage === 'monetized' && product.age >= 12 && product.monthlyRevenue >= 10000 && (
                   <ActionButton
-                    onClick={() => doAction('sell', product.id)}
+                    onClick={() => doAction('sell', { id: product.id })}
                     colorClasses="bg-red-50 hover:bg-red-100 border-2 border-red-200 hover:border-red-500 text-red-600 hover:text-red-700 py-2 px-4 text-xs font-black uppercase"
                   >
                     SELL PRODUCT
