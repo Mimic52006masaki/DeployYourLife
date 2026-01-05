@@ -1,156 +1,76 @@
 import { useGameState } from '../contexts/GameStateContext';
-import { IncomeBarChart } from './IncomeBarChart';
-import TrendChart from './TrendChart';
-import { TrendingUp, TrendingDown, Users, Heart } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Heart, Users } from 'lucide-react';
 
 export const SummaryModal = () => {
   const { gameState, dispatch } = useGameState();
   const [closing, setClosing] = useState(false);
-  if (!gameState.game.monthReport) return null;
 
   const report = gameState.game.monthReport;
+  if (!report) return null;
 
   const handleClose = () => {
     setClosing(true);
     setTimeout(() => {
-      dispatch({ type: 'UPDATE_STATE', payload: { ...gameState, game: { ...gameState.game, monthReport: null } } });
-    }, 300); // アニメーション時間
+      dispatch({ type: 'CLOSE_MONTH_REPORT' });
+    }, 300);
   };
 
   return (
     <div className="fixed inset-0 bg-white/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className={`bg-white border-4 border-zinc-900 p-10 max-w-lg w-full shadow-[20px_20px_0px_0px_rgba(0,0,0,1)] ${closing ? 'animate-out slide-out-to-bottom-2 duration-300' : 'animate-in zoom-in-95 duration-200'}`}>
-        <h2 className="text-3xl font-black mb-10 text-center uppercase italic underline decoration-indigo-500 underline-offset-8">Month {report.month} Summary</h2>
+      <div className={`bg-white border-4 border-zinc-900 p-8 max-w-md w-full shadow-[20px_20px_0px_0px_rgba(0,0,0,1)] ${closing ? 'animate-out slide-out-to-bottom-2 duration-300' : 'animate-in zoom-in-95 duration-200'}`}>
+        <h2 className="text-3xl font-black mb-8 text-center uppercase">{report.month}ヶ月目サマリー</h2>
 
-        {/* 収支グラフ */}
-        <div className="mb-8">
-          <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400 mb-4">Financial Overview</h3>
-          <IncomeBarChart income={report.income} expenses={report.expenses} />
-        </div>
-
-        {/* 詳細収入内訳 */}
-        <div className="space-y-3 mb-8">
-          <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400">Income Breakdown</h3>
-          {report.jobIncome > 0 && (
-            <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500">
-              <span className="text-zinc-400 uppercase font-bold">Job Income</span>
-              <span className="text-emerald-600 font-black">¥{(report.jobIncome ?? 0).toLocaleString()}</span>
-            </div>
-          )}
-          {report.freelanceIncome > 0 && (
-            <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500 delay-100">
-              <span className="text-zinc-400 uppercase font-bold">Freelance</span>
-              <span className={`font-black ${report.freelanceIncome > 100000 ? 'text-yellow-500 animate-pulse' : 'text-emerald-600'}`}>¥{(report.freelanceIncome ?? 0).toLocaleString()}</span>
-            </div>
-          )}
-          {report.corporationIncome > 0 && (
-            <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500 delay-200">
-              <span className="text-zinc-400 uppercase font-bold">Corporation</span>
-              <span className="text-indigo-600 font-black">¥{(report.corporationIncome ?? 0).toLocaleString()}</span>
-            </div>
-          )}
-          {report.employeeIncome > 0 && (
-            <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500 delay-300">
-              <span className="text-zinc-400 uppercase font-bold">Employee</span>
-              <span className={`font-black ${report.employeeIncome > 100000 ? 'text-yellow-500 animate-pulse' : 'text-indigo-600'}`}>
-                ¥{(report.employeeIncome ?? 0).toLocaleString()}
-              </span>
-            </div>
-          )}
-          {report.employeeBonus > 0 && (
-            <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500 delay-400">
-              <span className="text-zinc-400 uppercase font-bold">Employee Bonus</span>
-              <span className="text-purple-600 font-black">¥{(report.employeeBonus ?? 0).toLocaleString()}</span>
-            </div>
-          )}
-          {report.productIncome > 0 && (
-            <div className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500 delay-500">
-              <span className="text-zinc-400 uppercase font-bold">Product Income</span>
-              <span className="text-green-600 font-black">¥{(report.productIncome ?? 0).toLocaleString()}</span>
-            </div>
-          )}
-        </div>
-
-        {/* プロダクト別収益 */}
-        {report.productDetails && report.productDetails.length > 0 && (
-          <div className="space-y-2 mb-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400">Product Performance</h3>
-            {report.productDetails.map((product, index) => (
-              <div key={product.id} className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                <span className="text-zinc-400 uppercase font-bold truncate mr-2">{product.name}</span>
-                <span className="text-green-600 font-black">¥{product.revenue.toLocaleString()}</span>
-              </div>
-            ))}
+        {/* 収入・支出・収支 */}
+        <div className="space-y-3 mb-6">
+          <div className="flex justify-between items-center">
+            <span className="font-bold">収入:</span>
+            <span className="font-black text-emerald-600">¥{report.income.total.toLocaleString()}</span>
           </div>
-        )}
-
-        {/* 社員別貢献 */}
-        {report.employeeDetails && report.employeeDetails.length > 0 && (
-          <div className="space-y-2 mb-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400">Employee Contributions</h3>
-            {report.employeeDetails.map((employee, index) => (
-              <div key={employee.id} className="flex justify-between items-center text-xs animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                <span className="text-zinc-400 uppercase font-bold">
-                  {employee.name} (Lv.{employee.level} {employee.role})
-                </span>
-                <span className="text-purple-600 font-black">¥{employee.bonus.toLocaleString()}</span>
-              </div>
-            ))}
+          <div className="flex justify-between items-center">
+            <span className="font-bold">支出:</span>
+            <span className="font-black text-red-600">¥{report.expenses.total.toLocaleString()}</span>
           </div>
-        )}
-
-        {/* メンタル・フォロワー変化 */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-zinc-50 p-4 border border-zinc-200 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
-            <div className="flex items-center gap-2 mb-2">
-              <Heart size={16} className="text-red-500" />
-              <span className="text-xs font-black uppercase tracking-widest text-zinc-400">Mental</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {report.mentalChange > 0 ? (
-                <TrendingUp size={14} className="text-emerald-500" />
-              ) : report.mentalChange < 0 ? (
-                <TrendingDown size={14} className="text-red-500" />
-              ) : null}
-              <span className={`font-black ${report.mentalChange > 0 ? 'text-emerald-600' : report.mentalChange < 0 ? 'text-red-600' : 'text-zinc-600'}`}>
-                {report.mentalChange > 0 ? '+' : ''}{report.mentalChange}
-              </span>
-            </div>
+          <div className="flex justify-between items-center">
+            <span className="font-bold">収支:</span>
+            <span className={`font-black ${report.netMoney >= 0 ? 'text-indigo-600' : 'text-red-600'}`}>
+              ¥{report.netMoney.toLocaleString()}
+            </span>
           </div>
-          <div className="bg-zinc-50 p-4 border border-zinc-200 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-500">
-            <div className="flex items-center gap-2 mb-2">
-              <Users size={16} className="text-blue-500" />
-              <span className="text-xs font-black uppercase tracking-widest text-zinc-400">Followers</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {report.followerChange > 0 ? (
-                <TrendingUp size={14} className="text-green-500" />
-              ) : report.followerChange < 0 ? (
-                <TrendingDown size={14} className="text-red-500" />
-              ) : null}
-              <span className={`font-black ${report.followerChange > 0 ? 'text-green-600' : report.followerChange < 0 ? 'text-red-600' : 'text-zinc-600'}`}>
-                {report.followerChange > 0 ? '+' : ''}{report.followerChange}
-              </span>
-            </div>
+          <div className="flex justify-between items-center">
+            <span className="font-bold">現在の所持金:</span>
+            <span className="font-black">¥{gameState.economy.money.toLocaleString()}</span>
           </div>
         </div>
 
-        {/* 過去6ヶ月のトレンド */}
-        {gameState.game.history.length > 0 && <TrendChart history={gameState.game.history} />}
-
-        <div className="h-0.5 bg-zinc-900 my-6"></div>
-        <div className="flex justify-between items-center mb-8">
-          <span className="text-sm font-black uppercase">Net Result</span>
-          <span className={`text-3xl font-black ${report.netMoney >= 0 ? "text-indigo-600" : "text-red-600"}`}>
-            ¥{(report.netMoney ?? 0).toLocaleString()}
+        {/* メンタル */}
+        <div className="flex justify-between items-center mb-4 bg-zinc-50 p-3 border border-zinc-200 rounded">
+          <div className="flex items-center gap-2">
+            <Heart size={16} className="text-red-500" />
+            <span className="font-bold">メンタル</span>
+          </div>
+          <span className={`font-black ${report.mentalChange > 0 ? 'text-emerald-600' : report.mentalChange < 0 ? 'text-red-600' : 'text-zinc-600'}`}>
+            {report.mentalChange >= 0 ? '+' : ''}{report.mentalChange} → {gameState.player.mental}
           </span>
         </div>
+
+        {/* フォロワー */}
+        <div className="flex justify-between items-center mb-6 bg-zinc-50 p-3 border border-zinc-200 rounded">
+          <div className="flex items-center gap-2">
+            <Users size={16} className="text-blue-500" />
+            <span className="font-bold">フォロワー</span>
+          </div>
+          <span className={`font-black ${report.followerChange > 0 ? 'text-emerald-600' : report.followerChange < 0 ? 'text-red-600' : 'text-zinc-600'}`}>
+            {report.followerChange >= 0 ? '+' : ''}{report.followerChange} → {gameState.player.followers}
+          </span>
+        </div>
+
+        {/* 次へ */}
         <button
           onClick={handleClose}
-          className="w-full bg-indigo-600 text-white font-black py-5 hover:bg-indigo-500 transition-all uppercase tracking-widest animate-in fade-in slide-in-from-bottom-2 duration-500 delay-700"
+          className="w-full bg-indigo-600 text-white font-black py-4 hover:bg-indigo-500 transition-all uppercase tracking-widest"
         >
-          Next Turn
+          次へ
         </button>
       </div>
     </div>

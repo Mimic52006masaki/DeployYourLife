@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGameState } from '../contexts/GameStateContext';
 import EmployeeCard from './EmployeeCard';
 import { ActionButton } from './ActionButton';
+import { canDo, getLockReason } from '../phaseConfig';
 
 const EmployeeList = () => {
   const { gameState, hireEmployee } = useGameState();
@@ -9,12 +10,19 @@ const EmployeeList = () => {
   const [name, setName] = useState('');
   const [role, setRole] = useState('Developer');
 
+  const hireCost = 50000;
+
+  const handleOpenHireModal = () => {
+    if (!canDo('hire', gameState)) return;
+    setIsModalOpen(true);
+  };
+
   const handleHire = () => {
-    if (name.trim()) {
-      hireEmployee(name.trim(), role);
-      setName('');
-      setIsModalOpen(false);
-    }
+    if (!name.trim()) return;
+    if (gameState.economy.money < hireCost) return;
+    hireEmployee(name.trim(), role);
+    setName('');
+    setIsModalOpen(false);
   };
 
   const roles = ['Developer', 'Designer', 'Marketer'];
@@ -23,7 +31,12 @@ const EmployeeList = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">社員リスト</h2>
-        <ActionButton onClick={() => setIsModalOpen(true)} className="bg-blue-500 hover:bg-blue-600">
+        <ActionButton
+          onClick={handleOpenHireModal}
+          disabled={!canDo('hire', gameState)}
+          lockReason={getLockReason('hire', gameState)}
+          colorClasses="bg-blue-500 hover:bg-blue-600 text-white"
+        >
           社員雇用
         </ActionButton>
       </div>
@@ -68,10 +81,10 @@ const EmployeeList = () => {
               </div>
             </div>
             <div className="flex justify-end space-x-2 mt-6">
-              <ActionButton onClick={() => setIsModalOpen(false)} className="bg-gray-500 hover:bg-gray-600">
+              <ActionButton onClick={() => setIsModalOpen(false)} colorClasses="bg-gray-500 hover:bg-gray-600 text-white">
                 キャンセル
               </ActionButton>
-              <ActionButton onClick={handleHire} className="bg-green-500 hover:bg-green-600">
+              <ActionButton onClick={handleHire} colorClasses="bg-green-500 hover:bg-green-600 text-white">
                 雇用
               </ActionButton>
             </div>

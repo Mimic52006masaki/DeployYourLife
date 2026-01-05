@@ -1,5 +1,5 @@
-import React from 'react';
-import { useGameState } from './contexts/GameStateContext.jsx';
+import React, { useState, useMemo } from 'react';
+import { useGameState, GameStateProvider, defaultConfig, calculateIncome, calculateExpenses } from './contexts/GameStateContext.jsx';
 import { HUD } from './components/HUD';
 import { StatusPanel } from './components/StatusPanel';
 import { CommandMenu } from './components/CommandMenu';
@@ -7,9 +7,31 @@ import { JobList } from './components/JobList';
 import { ProductList } from './components/ProductList';
 import { SystemLogs } from './components/SystemLogs';
 import { SummaryModal } from './components/SummaryModal';
+import PartTimeSelection from './components/PartTimeSelection';
+import { GameSettings } from './components/GameSettings';
+import { IncomeBarChart } from './components/IncomeBarChart';
 
 function App() {
+  const [config, setConfig] = useState(defaultConfig);
+  const [gameStarted, setGameStarted] = useState(false);
+
+  const handleApplySettings = (newConfig) => {
+    setConfig(newConfig);
+    setGameStarted(true);
+  };
+
+  return (
+    <GameStateProvider config={config}>
+      {gameStarted ? <GameContent /> : <GameSettings onApply={handleApplySettings} />}
+    </GameStateProvider>
+  );
+}
+
+function GameContent() {
   const { gameState, doAction, endMonth, resetGame, getMentalEmoji, getSkillDisplayName, dispatch } = useGameState();
+
+  const income = useMemo(() => calculateIncome(gameState), [gameState]);
+  const expenses = useMemo(() => calculateExpenses(gameState), [gameState]);
 
   if (gameState.gameOver) {
     return (
@@ -45,13 +67,14 @@ function App() {
 
         <HUD gameState={gameState} />
 
+        <SystemLogs gameState={gameState} />
+
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
           {/* Left Column: Status (Order 2 on mobile, 1 on PC) */}
           <div className="lg:col-span-3 space-y-6 order-2 lg:order-1">
             <StatusPanel />
-            <SystemLogs gameState={gameState} />
           </div>
 
           {/* Middle Column: Actions (Order 1 on mobile, 2 on PC) */}
@@ -63,10 +86,17 @@ function App() {
           <div className="lg:col-span-4 space-y-6 order-3">
             <JobList />
             <ProductList />
+            {gameState.game.history.length > 0 && (
+              <div className="bg-white border-2 border-zinc-900 p-4 rounded shadow-md">
+                <h3 className="text-sm font-bold uppercase mb-2">Income Overview</h3>
+                <IncomeBarChart income={income.total} expenses={expenses.total} />
+              </div>
+            )}
           </div>
         </div>
 
         <SummaryModal />
+        <PartTimeSelection />
       </div>
     </div>
   );

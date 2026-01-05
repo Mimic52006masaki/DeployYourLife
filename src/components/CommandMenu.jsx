@@ -1,13 +1,14 @@
 import { Code, TrendingUp, Moon, Sparkles, MousePointer2 } from 'lucide-react';
 import { ActionButton } from './ActionButton';
 import { useGameState } from '../contexts/GameStateContext';
+import { getLockReason } from '../phaseConfig';
 
 export const CommandMenu = () => {
-  const { gameState, doAction, endMonth, getSkillDisplayName } = useGameState();
+  const { gameState, doAction, endMonth, getSkillDisplayName, addLog } = useGameState();
 
   const canPerformAction = (type, lang) => {
     if (gameState.economy.actionsLeft <= 0) return false;
-    if (type === 'learn' && gameState.economy.money < 20000) return false;
+    if (type === 'change_parttime' && gameState.economy.money < (gameState.player.partTimeJob?.income || 0)) return false;
 
     if (type === 'job' && !gameState.quests.selectedJob) return false;
     return true;
@@ -50,6 +51,7 @@ export const CommandMenu = () => {
             <ActionButton
               onClick={() => doAction('develop')}
               disabled={!canPerformAction('develop')}
+              lockReason={getLockReason('develop', gameState)}
               colorClasses="bg-zinc-50 hover:bg-white border-2 border-zinc-100 hover:border-green-500 flex justify-between items-center"
             >
               <span className="text-xs font-black uppercase">Develop App</span>
@@ -73,7 +75,21 @@ export const CommandMenu = () => {
             </div>
           </ActionButton>
 
-
+          {gameState.game.phase === 'parttime' && (
+            <ActionButton
+              onClick={() => doAction('change_parttime')}
+              disabled={!canPerformAction('change_parttime')}
+              colorClasses="bg-zinc-50 hover:bg-white border-2 border-zinc-100 hover:border-red-500 flex justify-between items-center"
+            >
+              <div className="bg-red-100 p-2 text-red-600 group-hover:bg-red-600 group-hover:text-white transition-colors">
+                🔄
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-black">バイト変更</p>
+                <p className="text-[8px] text-zinc-400 font-bold uppercase">Change Part-Time Job</p>
+              </div>
+            </ActionButton>
+          )}
 
           <ActionButton
             onClick={() => doAction('rest')}
@@ -93,7 +109,13 @@ export const CommandMenu = () => {
 
       {gameState.economy.actionsLeft <= 0 && (
         <div className="mt-12 pt-8 border-t-2 border-dashed border-zinc-100 text-center animate-in fade-in slide-in-from-bottom-2">
-          <ActionButton onClick={endMonth} colorClasses="bg-indigo-600 hover:bg-indigo-500 text-white py-4 px-12 border-b-4 border-indigo-900 shadow-xl flex items-center justify-center gap-3">
+          <ActionButton
+            onClick={() => {
+              addLog("⏳ 月を進めています…", "info");
+              setTimeout(endMonth, 1000); // 1秒後にendMonth
+            }}
+            colorClasses="bg-indigo-600 hover:bg-indigo-500 text-white py-4 px-12 border-b-4 border-indigo-900 shadow-xl flex items-center justify-center gap-3"
+          >
             <Sparkles size={18} />
             <span>NEXT TURN</span>
             <MousePointer2 size={18} className="animate-bounce" />
